@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Scenario/Chapters/Глава I.md",
+                "file": "Scenario/Chapters/Глава IV.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Глава I"
+              "title": "Глава IV"
             }
           }
         ]
@@ -87,7 +87,7 @@
       {
         "id": "712f8e521bf40622",
         "type": "tabs",
-        "dimension": 26.734505087881594,
+        "dimension": 32.36434108527132,
         "children": [
           {
             "id": "58ef8b2f79decc47",
@@ -156,9 +156,9 @@
         "currentTab": 2
       },
       {
-        "id": "5d7720a991850ce6",
+        "id": "fa11801aa3ed807f",
         "type": "tabs",
-        "dimension": 40.24051803885291,
+        "dimension": 40.019379844961236,
         "children": [
           {
             "id": "c8d3322360b06796",
@@ -175,7 +175,7 @@
       {
         "id": "4af2e60f134e830f",
         "type": "tabs",
-        "dimension": 33.024976873265494,
+        "dimension": 27.61627906976744,
         "children": [
           {
             "id": "6f1733f0de591345",
@@ -211,14 +211,15 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "8104f2285806c68b",
+  "active": "c8d3322360b06796",
   "lastOpenFiles": [
+    "Scenario/Chapters/Глава IV.md",
+    "Scenario/Chapters/Глава III.md",
+    "Scenario/Chapters/Глава II.md",
+    "Scenario/Chapters/Глава I.md",
+    "Scenario/Chapters/Пролог/Ритуал в прологе.md",
     "Scenario/Chapters/Глава V.md",
     "Scenario/Chapters/Пролог/Пролог.md",
-    "Scenario/Chapters/Глава I.md",
-    "Scenario/Chapters/Глава II.md",
-    "Scenario/Chapters/Глава III.md",
-    "Scenario/Chapters/Глава IV.md",
     "Characters/Призрак.md",
     "Characters/Йормунганд.md",
     "Characters/Отец Лис Годи/Отец Лис Годи.md",
@@ -246,7 +247,6 @@
     "Characters/Отец Лис Годи",
     "Characters/Дядя Лис",
     "Characters",
-    "Scenario/Chapters/Пролог/Ритуал в прологе.md",
     "Drawings/Drawing 19-21-2025.excalidraw.md",
     "Drawings/Drawing 21-19-2025.excalidraw.md",
     "remote-vault/Movies/covers/Samsara.png",
