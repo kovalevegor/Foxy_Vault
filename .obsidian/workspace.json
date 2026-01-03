@@ -34,9 +34,23 @@
               "icon": "lucide-file",
               "title": "Дядя Лис"
             }
+          },
+          {
+            "id": "f7c444c2b798b485",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "План.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "План"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -226,8 +240,10 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "7d688a0897ac4e6d",
+  "active": "f7c444c2b798b485",
   "lastOpenFiles": [
+    "Characters/Дядя Лис/Дядя Лис.md",
+    "План.md",
     "Scenario/Chapters/Глава V.md",
     "Scenario/Chapters/Глава IV.md",
     "Scenario/Chapters/Глава III.md",
@@ -239,7 +255,6 @@
     "Characters/Йормунганд.md",
     "Characters/Отец Лис Годи/Отец Лис Годи.md",
     "Characters/Лисенок/Лисенок.md",
-    "Characters/Дядя Лис/Дядя Лис.md",
     "Безвременье.md",
     "Лисенок.zip",
     "Characters.zip",
@@ -263,7 +278,6 @@
     "Characters/Дядя Лис",
     "Characters",
     "Drawings/Drawing 19-21-2025.excalidraw.md",
-    "Drawings/Drawing 21-19-2025.excalidraw.md",
     "remote-vault/Movies/covers/Samsara.png",
     "remote-vault/Attachments/Characters/Monk Protagonist/Sketch_1.png",
     "remote-vault/Movies/covers/LittleBuddha.png",
