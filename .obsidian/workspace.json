@@ -274,54 +274,12 @@
       "templates:Вставить шаблон": false,
       "command-palette:Открыть палитру команд": false,
       "markdown-importer:Импорт Markdown-файлов": false,
-      "omnisearch:Omnisearch": false,
-      "obsidian-excalidraw-plugin:Создать новый чертеж": false,
-      "obsidian-kanban:Создать новую доску": false,
-      "templater-obsidian:Templater": false,
-      "markwhen:Create new Markwhen file": false
+      "omnisearch:Omnisearch": false
     }
-  },
-  "floating": {
-    "id": "9e573d52c0d6e94c",
-    "type": "floating",
-    "children": [
-      {
-        "id": "11b737569e5bb863",
-        "type": "window",
-        "children": [
-          {
-            "id": "67e768c53c6f3715",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "bc1d096e176939a2",
-                "type": "leaf",
-                "state": {
-                  "type": "webviewer",
-                  "state": {
-                    "url": "https://obsidian.md/sync",
-                    "title": "Obsidian Sync",
-                    "mode": "webview"
-                  },
-                  "icon": "globe-2",
-                  "title": "Obsidian Sync"
-                }
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 448,
-        "y": 116,
-        "width": 1024,
-        "height": 800,
-        "maximize": false,
-        "zoom": 0
-      }
-    ]
   },
   "active": "1eecf6bf5302cdab",
   "lastOpenFiles": [
+    "Characters/Призрак.md",
     "Characters/Йормунганд.md",
     "Characters/Отец Лис Годи/Отец Лис Годи.md",
     "Characters/Лисенок/Лисенок.md",
@@ -357,7 +315,6 @@
     "Scenario/Chapters/Пролог/Ритуал в прологе.md",
     "Drawings/Drawing 19-21-2025.excalidraw.md",
     "Drawings/Drawing 21-19-2025.excalidraw.md",
-    "Drawings/Drawing 28-15-2025.excalidraw.md",
     "remote-vault/Movies/covers/Samsara.png",
     "remote-vault/Attachments/Characters/Monk Protagonist/Sketch_1.png",
     "remote-vault/Movies/covers/LittleBuddha.png",
