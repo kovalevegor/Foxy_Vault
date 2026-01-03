@@ -84,7 +84,7 @@
               "type": "markdown",
               "state": {
                 "file": "Characters/Призрак.md",
-                "mode": "preview",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
@@ -266,6 +266,11 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "obsidian-excalidraw-plugin:Создать новый чертеж": false,
+      "obsidian-kanban:Создать новую доску": false,
+      "templater-obsidian:Templater": false,
+      "markwhen:Create new Markwhen file": false,
+      "obsidian-git:Open Git source control": false,
       "graph:Граф": false,
       "bases:Создать новую базу": false,
       "switcher:Меню быстрого перехода": false,
