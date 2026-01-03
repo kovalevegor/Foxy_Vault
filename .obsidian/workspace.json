@@ -70,7 +70,7 @@
               "type": "markdown",
               "state": {
                 "file": "Scenario/Chapters/Глава IV.md",
-                "mode": "preview",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
@@ -92,7 +92,7 @@
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -282,7 +282,7 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "1eecf6bf5302cdab",
+  "active": "e2451c4195838b09",
   "lastOpenFiles": [
     "Characters/Призрак.md",
     "Characters/Йормунганд.md",
