@@ -232,13 +232,19 @@
       "command-palette:Open command palette": false,
       "markdown-importer:Open format converter": false,
       "bases:Create new base": false,
-      "omnisearch:Omnisearch": false
+      "omnisearch:Omnisearch": false,
+      "obsidian-excalidraw-plugin:New drawing": false,
+      "obsidian-kanban:Create new board": false,
+      "templater-obsidian:Templater": false,
+      "markwhen:Create new Markwhen file": false,
+      "obsidian-git:Open Git source control": false
     }
   },
   "active": "f7c444c2b798b485",
   "lastOpenFiles": [
-    "Characters/Дядя Лис/Дядя Лис.md",
+    "conflict-files-obsidian-git.md",
     "План.md",
+    "Characters/Дядя Лис/Дядя Лис.md",
     "Scenario/Chapters/Глава V.md",
     "Scenario/Chapters/Глава IV.md",
     "Scenario/Chapters/Глава III.md",
@@ -272,7 +278,6 @@
     "Characters/Отец Лис Годи",
     "Characters/Дядя Лис",
     "Characters",
-    "Drawings/Drawing 19-21-2025.excalidraw.md",
     "remote-vault/Movies/covers/Samsara.png",
     "remote-vault/Attachments/Characters/Monk Protagonist/Sketch_1.png",
     "remote-vault/Movies/covers/LittleBuddha.png",
