@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<title>Прототип: рунная мозаика</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+
+<style>
+:root{
+  --bg-main:#0b0b0b;
+  --bg-panel:#111;
+  --accent:#cfa36a;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--bg-main);
+  color:#eee;
+  height:100vh;
+}
+
+.app{
+  display:grid;
+  grid-template-columns: 1fr 340px;
+  height:100vh;
+}
+
+/* ===== Левая часть ===== */
+
+.playfield{
+  display:flex;
+  flex-direction:column;
+  padding:16px;
+  gap:12px;
+}
+
+.controls{
+  display:flex;
+  gap:8px;
+}
+
+.board-wrap{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.board{
+  position:relative;
+  width:min(90vmin, 100%);
+  aspect-ratio:1/1;
+  background:radial-gradient(circle at center,#111,#080808);
+  border-radius:14px;
+  overflow:hidden;
+}
+
+/* ===== Узлы ===== */
+
+.node{
+  position:absolute;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  cursor:pointer;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+
+.node:hover{
+  transform:scale(1.05);
+}
+
+/* Артефакты второго уровня */
+.artifact{
+  width:140px;
+  height:140px;
+  border:4px solid;
+  font-size:14px;
+}
+
+.artifact.unknown{
+  background:#2b2b3a;
+  border-color:#666;
+}
+
+.artifact.naive{
+  background:#2b4a2b;
+  border-color:#6fbf6f;
+}
+
+.artifact.cynic{
+  background:#4a2b2b;
+  border-color:#ff8a8a;
+}
+
+.artifact.locked{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+
+.artifact.conflicted{
+  border-color:#ff6600;
+  box-shadow:0 0 20px rgba(255,102,0,0.5);
+}
+
+/* Трактовка главы */
+.main{
+  width:180px;
+  height:180px;
+  background:#3a2b3a;
+  border:5px solid var(--accent);
+  flex-direction:column;
+}
+
+/* Подсказки */
+.clue{
+  width:96px;
+  height:96px;
+  border:3px solid #444;
+  font-size:12px;
+  background:#1a1a1a;
+}
+
+.clue.found{
+  box-shadow:0 0 16px rgba(200,160,80,0.6);
+  border-color:var(--accent);
+}
+
+/* ===== Правая панель ===== */
+
+.sidebar{
+  background:#151515;
+  padding:16px;
+  overflow-y:auto;
+}
+
+.panel{
+  background:#0f0f10;
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:10px;
+}
+
+button{
+  background:#222;
+  border:1px solid #333;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+
+.small{
+  font-size:13px;
+  color:#9aa;
+}
+
+.verdict{
+  font-weight:700;
+}
+
+.warning{
+  color:#ff8a8a;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.conflict-badge{
+  display:inline-block;
+  background:#ff6600;
+  color:#fff;
+  padding:2px 6px;
+  border-radius:4px;
+  font-size:11px;
+  margin-left:6px;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <div class="playfield">
+    <div class="controls">
+      <button id="resetBtn">Сброс</button>
+      <button id="randomBtn">Случайно показать подсказки</button>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <h3>Прототип: рунная мозаика</h3>
+
+    <div class="panel">
+      <div class="small">Инструкция:</div>
+      <ul class="small">
+        <li>Вокруг — 6 подсказок (по 2 на улику).</li>
+        <li>Каждая подсказка связана с уликой и трактовкой.</li>
+        <li>Улику можно выбрать только при наличии подсказки.</li>
+        <li><strong>Улики 1 и 2 взаимосвязаны:</strong> если выбрать одну, вторая автоматически получит согласованную трактовку.</li>
+        <li>Трактовка главы определяется после завершения главы.</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <strong>Философский вопрос</strong>
+      <div style="margin-top:8px">
+        <label style="display:block;margin:4px 0;cursor:pointer">
+          <input type="radio" name="question" value="naive" id="qNaive" checked>
+          <span class="small">Наивный ответ</span>
+        </label>
+        <label style="display:block;margin:4px 0;cursor:pointer">
+          <input type="radio" name="question" value="cynic" id="qCynic">
+          <span class="small">Циничный ответ</span>
+        </label>
+      </div>
+      <button id="finishBtn" style="margin-top:12px;width:100%">Завершить главу</button>
+    </div>
+
+    <div class="panel">
+      <strong>Улики</strong>
+      <div id="artList" style="margin-top:8px;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <div class="panel">
+      <strong>Подсказки (найденные)</strong>
+      <div id="foundList" class="small" style="margin-top:8px">—</div>
+    </div>
+
+    <div class="panel">
+      <div class="verdict" id="verdict">Версия: —</div>
+      <div class="small" id="verDetails"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// По 2 подсказки на каждую улику
+const CLUES = [
+  {id:'c1', artifact:0, alignment:'naive', title:'Подсказка 1-Н'},
+  {id:'c2', artifact:0, alignment:'cynic', title:'Подсказка 1-Ц'},
+  
+  {id:'c3', artifact:1, alignment:'naive', title:'Подсказка 2-Н'},
+  {id:'c4', artifact:1, alignment:'cynic', title:'Подсказка 2-Ц'},
+  
+  {id:'c5', artifact:2, alignment:'naive', title:'Подсказка 3-Н'},
+  {id:'c6', artifact:2, alignment:'cynic', title:'Подсказка 3-Ц'}
+];
+
+// Улики 0 и 1 взаимосвязаны
+const LINKED_ARTIFACTS = [0, 1];
+
+const board = document.getElementById('board');
+
+let found = {};
+let artifactState = {};
+let chapterFinished = false;
+
+CLUES.forEach(c=>found[c.id]=false);
+
+const numArtifacts = 3;
+for(let i=0;i<numArtifacts;i++) artifactState[i]='unknown';
+
+function getBoardSize(){
+  return board.getBoundingClientRect();
+}
+
+function createSVG() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.id = 'connections';
+  svg.style.position = 'absolute';
+  svg.style.top = '0';
+  svg.style.left = '0';
+  svg.style.width = '100%';
+  svg.style.height = '100%';
+  svg.style.pointerEvents = 'none';
+  board.appendChild(svg);
+  return svg;
+}
+
+function createUI(){
+  board.innerHTML='';
+  const {width:W,height:H}=getBoardSize();
+
+  /* Трактовка главы */
+  const main=document.createElement('div');
+  main.className='node main';
+  main.style.left=(W/2-90)+'px';
+  main.style.top=(H/2-90)+'px';
+  main.innerHTML=`
+    <div>Трактовка<br>главы</div>
+    <div id="mainState" style="margin-top:8px;font-size:13px;color:#ffd"></div>`;
+  board.appendChild(main);
+
+  /* Улики */
+  const artRadius=W*0.22;
+  for(let i=0;i<numArtifacts;i++){
+    const ang = 2 * Math.PI * i / numArtifacts - Math.PI / 2;
+    const x=W/2+Math.cos(ang)*artRadius-70;
+    const y=H/2+Math.sin(ang)*artRadius-70;
+
+    const a=document.createElement('div');
+    a.className='node artifact unknown';
+    a.id='artifact-'+i;
+    a.style.left=x+'px';
+    a.style.top=y+'px';
+    a.innerHTML=`
+      <div>Улика ${i+1}</div>
+      <div id="art-${i}-state" style="font-size:12px;margin-top:6px">не выбран</div>`;
+    a.onclick=()=>onArtifactClick(i);
+    board.appendChild(a);
+  }
+
+  /* Подсказки */
+  const r=W*0.38;
+  CLUES.forEach((c,i)=>{
+    const ang=2*Math.PI*i/CLUES.length-Math.PI/2;
+    const x=W/2+Math.cos(ang)*r-48;
+    const y=H/2+Math.sin(ang)*r-48;
+
+    const el=document.createElement('div');
+    el.className='node clue';
+    el.id=c.id;
+    el.style.left=x+'px';
+    el.style.top=y+'px';
+    el.innerHTML=`
+      <div>${c.title}</div>
+      <div style="font-size:11px;color:#aaa"><br>${c.alignment}</div>`;
+    el.onclick=()=>onClueClick(c.id);
+    board.appendChild(el);
+  });
+
+  // Линия связи между Уликами 0 и 1
+  const art0 = document.getElementById('artifact-0');
+  const art1 = document.getElementById('artifact-1');
+  if(art0 && art1) {
+    const svg = createSVG();
+    const boardRect = board.getBoundingClientRect();
+    
+    const rect0 = art0.getBoundingClientRect();
+    const x0 = rect0.left - boardRect.left + rect0.width / 2;
+    const y0 = rect0.top - boardRect.top + rect0.height / 2;
+    
+    const rect1 = art1.getBoundingClientRect();
+    const x1 = rect1.left - boardRect.left + rect1.width / 2;
+    const y1 = rect1.top - boardRect.top + rect1.height / 2;
+    
+    const linkLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    linkLine.setAttribute("x1", x0);
+    linkLine.setAttribute("y1", y0);
+    linkLine.setAttribute("x2", x1);
+    linkLine.setAttribute("y2", y1);
+    linkLine.setAttribute("stroke", "#666");
+    linkLine.setAttribute("stroke-width", "3");
+    linkLine.setAttribute("stroke-dasharray", "8,4");
+    linkLine.id = 'link-line';
+    svg.appendChild(linkLine);
+  }
+
+  refreshUI();
+}
+
+function onClueClick(id){
+  found[id]=!found[id];
+  document.getElementById(id).classList.toggle('found',found[id]);
+  
+  // Проверить все улики и обновить их состояния
+  autoUpdateArtifacts();
+  refreshUI();
+}
+
+function autoUpdateArtifacts() {
+  for(let i=0; i<numArtifacts; i++){
+    const hasN = CLUES.some(c => c.artifact === i && c.alignment === 'naive' && found[c.id]);
+    const hasC = CLUES.some(c => c.artifact === i && c.alignment === 'cynic' && found[c.id]);
+    const cur = artifactState[i];
+
+    // Если нет ни одной подсказки - сбросить состояние
+    if(!hasN && !hasC) {
+      if(cur !== 'unknown') {
+        artifactState[i] = 'unknown';
+        // Сбросить связанную улику если она была автоматически установлена
+        if(LINKED_ARTIFACTS.includes(i)) {
+          const linkedIdx = LINKED_ARTIFACTS.find(idx => idx !== i);
+          // Проверить, есть ли подсказки для связанной улики
+          const linkedHasN = CLUES.some(c => c.artifact === linkedIdx && c.alignment === 'naive' && found[c.id]);
+          const linkedHasC = CLUES.some(c => c.artifact === linkedIdx && c.alignment === 'cynic' && found[c.id]);
+          if(!linkedHasN && !linkedHasC) {
+            artifactState[linkedIdx] = 'unknown';
+          }
+        }
+      }
+    }
+    // Если текущая трактовка - наивная, но наивной подсказки больше нет
+    else if(cur === 'naive' && !hasN) {
+      if(hasC) {
+        artifactState[i] = 'cynic';
+        // Обновить связанную улику
+        if(LINKED_ARTIFACTS.includes(i)) {
+          const linkedIdx = LINKED_ARTIFACTS.find(idx => idx !== i);
+          if(artifactState[linkedIdx] !== 'unknown') {
+            artifactState[linkedIdx] = 'cynic';
+          }
+        }
+      }
+    }
+    // Если текущая трактовка - циничная, но циничной подсказки больше нет
+    else if(cur === 'cynic' && !hasC) {
+      if(hasN) {
+        artifactState[i] = 'naive';
+        // Обновить связанную улику
+        if(LINKED_ARTIFACTS.includes(i)) {
+          const linkedIdx = LINKED_ARTIFACTS.find(idx => idx !== i);
+          if(artifactState[linkedIdx] !== 'unknown') {
+            artifactState[linkedIdx] = 'naive';
+          }
+        }
+      }
+    }
+  }
+}
+
+function countSelected() {
+  return Object.values(artifactState).filter(s => s !== 'unknown').length;
+}
+
+function areLinkedArtifactsConflicted() {
+  const state0 = artifactState[LINKED_ARTIFACTS[0]];
+  const state1 = artifactState[LINKED_ARTIFACTS[1]];
+  
+  if(state0 === 'unknown' || state1 === 'unknown') return false;
+  return state0 !== state1;
+}
+
+function onArtifactClick(i){
+  const hasN=CLUES.some(c=>c.artifact===i&&c.alignment==='naive'&&found[c.id]);
+  const hasC=CLUES.some(c=>c.artifact===i&&c.alignment==='cynic'&&found[c.id]);
+  const cur=artifactState[i];
+
+  if(cur==='unknown'){
+    if(hasN) {
+      artifactState[i]='naive';
+      // Если это связанная улика, автоматически установить согласованную трактовку для связанной
+      if(LINKED_ARTIFACTS.includes(i)) {
+        const linkedIdx = LINKED_ARTIFACTS.find(idx => idx !== i);
+        if(artifactState[linkedIdx] === 'unknown') {
+          artifactState[linkedIdx] = 'naive';
+        }
+      }
+    }
+    else if(hasC) {
+      artifactState[i]='cynic';
+      if(LINKED_ARTIFACTS.includes(i)) {
+        const linkedIdx = LINKED_ARTIFACTS.find(idx => idx !== i);
+        if(artifactState[linkedIdx] === 'unknown') {
+          artifactState[linkedIdx] = 'cynic';
+        }
+      }
+    }
+    else return;
+  }else if(cur==='naive'){
+    if(hasC) {
+      artifactState[i]='cynic';
+      // Обновить связанную улику если она уже выбрана
+      if(LINKED_ARTIFACTS.includes(i)) {
+        const linkedIdx = LINKED_ARTIFACTS.find(idx => idx !== i);
+        if(artifactState[linkedIdx] !== 'unknown') {
+          artifactState[linkedIdx] = 'cynic';
+        }
+      }
+    }
+  }else{
+    if(hasN) {
+      artifactState[i]='naive';
+      if(LINKED_ARTIFACTS.includes(i)) {
+        const linkedIdx = LINKED_ARTIFACTS.find(idx => idx !== i);
+        if(artifactState[linkedIdx] !== 'unknown') {
+          artifactState[linkedIdx] = 'naive';
+        }
+      }
+    }
+  }
+  refreshUI();
+}
+
+function refreshUI(){
+  CLUES.forEach(c=>{
+    document.getElementById(c.id).classList.toggle('found',found[c.id]);
+  });
+
+  let svg = document.getElementById('connections');
+  if(!svg) svg = createSVG();
+  
+  // Сохранить линию связи между уликами
+  const linkLine = svg.querySelector('#link-line');
+  svg.innerHTML = '';
+  if(linkLine) svg.appendChild(linkLine);
+
+  // Draw connections from found clues to artifacts
+  CLUES.forEach(c => {
+    if (found[c.id]) {
+      const clueEl = document.getElementById(c.id);
+      const clueRect = clueEl.getBoundingClientRect();
+      const boardRect = board.getBoundingClientRect();
+      const cx = clueRect.left - boardRect.left + clueRect.width / 2;
+      const cy = clueRect.top - boardRect.top + clueRect.height / 2;
+
+      const artEl = document.getElementById('artifact-' + c.artifact);
+      const artRect = artEl.getBoundingClientRect();
+      const ax = artRect.left - boardRect.left + artRect.width / 2;
+      const ay = artRect.top - boardRect.top + artRect.height / 2;
+
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", cx);
+      line.setAttribute("y1", cy);
+      line.setAttribute("x2", ax);
+      line.setAttribute("y2", ay);
+      line.setAttribute("stroke", c.alignment === 'naive' ? '#6fbf6f' : '#ff8a8a');
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+    }
+  });
+
+  let counts={naive:0,cynic:0,unknown:0};
+  const selected = countSelected();
+  const isConflicted = areLinkedArtifactsConflicted();
+
+  for(let i=0;i<numArtifacts;i++){
+    const el=document.getElementById('artifact-'+i);
+    el.classList.remove('unknown','naive','cynic','locked','conflicted');
+    el.classList.add(artifactState[i]);
+    
+    // Отметить конфликт между связанными уликами
+    if(isConflicted && LINKED_ARTIFACTS.includes(i)) {
+      el.classList.add('conflicted');
+    }
+    
+    document.getElementById('art-'+i+'-state').innerHTML=
+      artifactState[i]==='unknown'?'не выбран':
+      artifactState[i]==='naive'?'<br>naive':'<br>cynic';
+    counts[artifactState[i]]++;
+
+    if (artifactState[i] !== 'unknown') {
+      const artRect = el.getBoundingClientRect();
+      const boardRect = board.getBoundingClientRect();
+      const ax = artRect.left - boardRect.left + artRect.width / 2;
+      const ay = artRect.top - boardRect.top + artRect.height / 2;
+
+      const mainEl = document.querySelector('.main');
+      const mainRect = mainEl.getBoundingClientRect();
+      const mx = mainRect.left - boardRect.left + mainRect.width / 2;
+      const my = mainRect.top - boardRect.top + mainRect.height / 2;
+
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", ax);
+      line.setAttribute("y1", ay);
+      line.setAttribute("x2", mx);
+      line.setAttribute("y2", my);
+      line.setAttribute("stroke", artifactState[i] === 'naive' ? '#6fbf6f' : '#ff8a8a');
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+    }
+  }
+
+  let main='—';
+  if(chapterFinished) {
+    if(counts.naive>counts.cynic) main='Наивная';
+    else if(counts.cynic>counts.naive) main='Циничная';
+    else main='Нейтральная';
+  }
+
+  document.getElementById('mainState').textContent=main;
+  
+  let verdictText = 'Версия: '+main;
+  if(isConflicted) {
+    verdictText += ' (конфликт!)';
+  }
+  
+  document.getElementById('verdict').innerHTML = verdictText + (isConflicted ? '<span class="conflict-badge">ПРОТИВОРЕЧИЕ</span>' : '');
+  document.getElementById('verDetails').innerHTML = 
+    `Наивных ${counts.naive}, циничных ${counts.cynic}, невыбранных ${counts.unknown}.<br>` +
+    (isConflicted ? '<span class="warning">⚠ Улики 1 и 2 противоречат друг другу!</span>' : '');
+
+  const foundList=document.getElementById('foundList');
+  const items=CLUES.filter(c=>found[c.id]);
+  foundList.innerHTML=items.length
+    ?items.map(f=>`• [Улика${f.artifact+1}] ${f.title} (${f.alignment})`).join('<br>')
+    :'—';
+
+  const artList=document.getElementById('artList');
+  artList.innerHTML='';
+  for(let i=0;i<numArtifacts;i++){
+    const hasN = CLUES.some(c => c.artifact === i && c.alignment === 'naive' && found[c.id]);
+    const hasC = CLUES.some(c => c.artifact === i && c.alignment === 'cynic' && found[c.id]);
+    const versions = [];
+    if (hasN) versions.push('naive');
+    if (hasC) versions.push('cynic');
+    const verText = versions.length ? versions.join(', ') : 'нет';
+
+    const row=document.createElement('div');
+    row.className='small';
+    row.style.display='flex';
+    row.style.justifyContent='space-between';
+    row.style.alignItems='center';
+
+    const left=document.createElement('div');
+    let linkInfo = '';
+    if(LINKED_ARTIFACTS.includes(i)) {
+      linkInfo = '<span style="color:#ff6600">↔</span> ';
+    }
+    left.innerHTML=`<strong>${linkInfo}Улика ${i+1}</strong><div class="small">Найдены версии: ${verText}</div>`;
+    row.appendChild(left);
+
+    // Кнопка переключения только если найдены обе версии и улика выбрана
+    if (hasN && hasC && artifactState[i] !== 'unknown') {
+      const btn=document.createElement('button');
+      btn.textContent='Переключить';
+      btn.onclick=()=>onArtifactClick(i);
+      row.appendChild(btn);
+    }
+
+    artList.appendChild(row);
+  }
+}
+
+document.getElementById('resetBtn').onclick=()=>{
+  CLUES.forEach(c=>found[c.id]=false);
+  for(let i=0;i<numArtifacts;i++) artifactState[i]='unknown';
+  chapterFinished = false;
+  refreshUI();
+};
+
+document.getElementById('randomBtn').onclick=()=>{
+  CLUES.forEach(c=>found[c.id]=false);
+  const randomNum = Math.floor(Math.random() * CLUES.length) + 1;
+  CLUES.sort(()=>Math.random()-0.5).slice(0, randomNum).forEach(c=>found[c.id]=true);
+  for(let i=0;i<numArtifacts;i++) artifactState[i]='unknown';
+  chapterFinished = false;
+  refreshUI();
+};
+
+document.getElementById('finishBtn').onclick=()=>{
+  // Получить выбранный ответ на вопрос
+  const questionAnswer = document.getElementById('qNaive').checked ? 'naive' : 'cynic';
+  
+  // Для каждой улики без подсказок установить трактовку по ответу на вопрос
+  for(let i=0; i<numArtifacts; i++){
+    const hasAnyClue = CLUES.some(c => c.artifact === i && found[c.id]);
+    if(!hasAnyClue && artifactState[i] === 'unknown') {
+      artifactState[i] = questionAnswer;
+    }
+  }
+  
+  chapterFinished = true;
+  refreshUI();
+};
+
+window.addEventListener('resize',createUI);
+
+createUI();
+</script>
+</body>
+</html>

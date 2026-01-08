@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Scenario/Chapters/Глава III.md",
+                "file": "План.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Глава III"
+              "title": "План"
             }
           }
         ],
@@ -107,7 +107,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 326.5
   },
   "right": {
     "id": "d7f9c94bd0887645",
@@ -220,7 +220,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 250.5
+    "width": 291.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -240,10 +240,13 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "f7c444c2b798b485",
+  "active": "dfced69a6d84432c",
   "lastOpenFiles": [
-    "План.md",
+    "inter_graph_v4.html",
+    "interpret_mosaic_v4.html",
+    "rune_mosaic_v4.html",
     "conflict-files-obsidian-git.md",
+    "План.md",
     "Characters/Дядя Лис/Дядя Лис.md",
     "Scenario/Chapters/Глава V.md",
     "Scenario/Chapters/Глава IV.md",
@@ -274,10 +277,7 @@
     "Characters/Мать Лиса/Мать Лиса.md",
     "Characters/Мать Лиса",
     "Characters/Лисенок",
-    "Персонажи/Без названия.md",
     "Characters/Отец Лис Годи",
-    "Characters/Дядя Лис",
-    "Characters",
     "remote-vault/Movies/covers/Samsara.png",
     "remote-vault/Attachments/Characters/Monk Protagonist/Sketch_1.png",
     "remote-vault/Movies/covers/LittleBuddha.png",
