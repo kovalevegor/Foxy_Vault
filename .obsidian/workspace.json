@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "План.md",
+                "file": "Scenario/Chapters/Пролог/Пролог.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "План"
+              "title": "Пролог"
             }
           }
         ],
@@ -240,13 +240,13 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "dfced69a6d84432c",
+  "active": "f7c444c2b798b485",
   "lastOpenFiles": [
+    "План.md",
     "inter_graph_v4.html",
     "interpret_mosaic_v4.html",
     "rune_mosaic_v4.html",
     "conflict-files-obsidian-git.md",
-    "План.md",
     "Characters/Дядя Лис/Дядя Лис.md",
     "Scenario/Chapters/Глава V.md",
     "Scenario/Chapters/Глава IV.md",
@@ -277,7 +277,6 @@
     "Characters/Мать Лиса/Мать Лиса.md",
     "Characters/Мать Лиса",
     "Characters/Лисенок",
-    "Characters/Отец Лис Годи",
     "remote-vault/Movies/covers/Samsara.png",
     "remote-vault/Attachments/Characters/Monk Protagonist/Sketch_1.png",
     "remote-vault/Movies/covers/LittleBuddha.png",
