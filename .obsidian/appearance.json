@@ -6,7 +6,7 @@
   "interfaceFontFamily": "Segoe UI",
   "textFontFamily": "Segoe UI Variable Display",
   "monospaceFontFamily": "Ubuntu Mono",
-  "baseFontSize": 22,
+  "baseFontSize": 17,
   "accentColor": "",
   "baseFontSizeAction": true,
   "showViewHeader": true
