@@ -62,9 +62,21 @@
               "icon": "lucide-file",
               "title": "тест"
             }
+          },
+          {
+            "id": "9a0a7c30b5784132",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Drawings/Drawing 09-19-2026.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Drawing 09-19-2026.excalidraw"
+            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -121,7 +133,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 326.5
+    "width": 326.5,
+    "collapsed": true
   },
   "right": {
     "id": "d7f9c94bd0887645",
@@ -234,7 +247,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 291.5
+    "width": 291.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -254,10 +268,12 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "022ca2ea237253e8",
+  "active": "9a0a7c30b5784132",
   "lastOpenFiles": [
-    "Scenario/Chapters/Пролог/Пролог.md",
     "Scenario/Chapters/Пролог/тест.md",
+    "Drawings/Drawing 09-19-2026.excalidraw.md",
+    "Drawings",
+    "Scenario/Chapters/Пролог/Пролог.md",
     "План.md",
     "inter_graph_v4.html",
     "interpret_mosaic_v4.html",
@@ -289,9 +305,7 @@
     "Scenario/Chapters/Пролог",
     "Scenario/Chapters",
     "Locations",
-    "Characters/Мать Лиса/Мать Лиса.md",
     "Characters/Мать Лиса",
-    "Characters/Лисенок",
     "remote-vault/Movies/covers/Samsara.png",
     "remote-vault/Attachments/Characters/Monk Protagonist/Sketch_1.png",
     "remote-vault/Movies/covers/LittleBuddha.png",
