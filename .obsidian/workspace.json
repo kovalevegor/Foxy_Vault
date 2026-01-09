@@ -76,7 +76,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -268,8 +268,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "9a0a7c30b5784132",
+  "active": "f7c444c2b798b485",
   "lastOpenFiles": [
+    "Drawings/Drawing 09-19-2026.excalidraw.md",
+    "Pasted Image 20260109200646_892.png",
     "Pasted Image 20260109200625_930.png",
     "Pasted Image 20260109200617_718.png",
     "Pasted Image 20260109200602_174.png",
@@ -277,7 +279,6 @@
     "Pasted Image 20260109200533_822.png",
     "Pasted Image 20260109200516_390.png",
     "Scenario/Chapters/Пролог/тест.md",
-    "Drawings/Drawing 09-19-2026.excalidraw.md",
     "Drawings",
     "Scenario/Chapters/Пролог/Пролог.md",
     "План.md",
@@ -315,9 +316,7 @@
     "remote-vault/Attachments/Characters/Monk Protagonist/Sketch_1.png",
     "remote-vault/Movies/covers/LittleBuddha.png",
     "remote-vault/Untitled.canvas",
-    "remote-vault/Attachments/References/Characters/0f53dd6a995459b55342505a7c8cb01a.jpg",
     "remote-vault/Tasks Board/Без названия.canvas",
-    "remote-vault/Attachments/References/Poduction/beffio-studio-the-lost-land-vegetation-beffio.jpg",
     "Без названия.canvas",
     "Knowledge Den/Без названия.canvas"
   ]
