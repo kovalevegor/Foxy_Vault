@@ -62,12 +62,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Characters/Отец Лис Годи/Отец Лис Годи.md",
+                "file": "Characters/Дед Лис/Дед Лис.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Отец Лис Годи"
+              "title": "Дед Лис"
             }
           }
         ]
@@ -263,9 +263,12 @@
   },
   "active": "8383efde1e743972",
   "lastOpenFiles": [
-    "Characters/Дядя Лис/Дядя Лис.md",
     "Characters/Отец Лис Годи/Отец Лис Годи.md",
+    "Characters/Дед Лис/Дед Лис.md",
+    "Characters/Дед Лис",
     "Drawings/Drawing 09-19-2026.excalidraw.md",
+    "План.md",
+    "Characters/Дядя Лис/Дядя Лис.md",
     "Scenario/Chapters/Пролог/тест.md",
     "Scenario/Chapters/Пролог/Пролог.md",
     "Scenario/Chapters/Глава V.md",
@@ -277,7 +280,6 @@
     "Pasted Image 20260109200533_822.png",
     "Pasted Image 20260109200516_390.png",
     "Drawings",
-    "План.md",
     "inter_graph_v4.html",
     "interpret_mosaic_v4.html",
     "rune_mosaic_v4.html",
@@ -304,7 +306,6 @@
     "Scenario/Chapters/Пролог",
     "Scenario/Chapters",
     "Locations",
-    "Characters/Мать Лиса",
     "remote-vault/Movies/covers/Samsara.png",
     "remote-vault/Attachments/Characters/Monk Protagonist/Sketch_1.png",
     "remote-vault/Movies/covers/LittleBuddha.png",
