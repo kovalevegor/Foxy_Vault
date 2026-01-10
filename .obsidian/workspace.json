@@ -48,14 +48,7 @@
               "icon": "lucide-file",
               "title": "Дядя Лис"
             }
-          }
-        ],
-        "currentTab": 1
-      },
-      {
-        "id": "6b292b9b94a6e862",
-        "type": "tabs",
-        "children": [
+          },
           {
             "id": "8383efde1e743972",
             "type": "leaf",
@@ -70,7 +63,8 @@
               "title": "Дед Лис"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
