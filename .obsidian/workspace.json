@@ -49,7 +49,8 @@
               "title": "Пролог"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -239,8 +240,9 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "8104f2285806c68b",
+  "active": "f7c444c2b798b485",
   "lastOpenFiles": [
+    "Scenario/Chapters/Глава V.md",
     "Scenario/Chapters/Пролог/Пролог.md",
     "Scenario/Chapters/Пролог/тест.md",
     "Pasted Image 20260109200646_892.png",
@@ -260,7 +262,6 @@
     "rune_mosaic_v4.html",
     "conflict-files-obsidian-git.md",
     "Characters/Дядя Лис/Дядя Лис.md",
-    "Scenario/Chapters/Глава V.md",
     "Scenario/Chapters/Глава IV.md",
     "Scenario/Chapters/Глава III.md",
     "Scenario/Chapters/Глава II.md",
