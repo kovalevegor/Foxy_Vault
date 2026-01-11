@@ -48,7 +48,7 @@
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -239,10 +239,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "f7c444c2b798b485",
+  "active": "864f4f1e45981b7d",
   "lastOpenFiles": [
-    "Drawings/Pre-prologue.md",
     "Scenario/Chapters/Пролог/Пролог.md",
+    "Drawings/Pre-prologue.md",
     "Characters/Дед Лис/Дед Лис.md",
     "Characters/Дядя Лис/Дядя Лис.md",
     "Pasted Image 20260109200516_390.png",
