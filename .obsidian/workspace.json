@@ -22,7 +22,21 @@
             }
           },
           {
-            "id": "7d688a0897ac4e6d",
+            "id": "f7c444c2b798b485",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Scenario/Chapters/Пролог/Пролог.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Пролог"
+            }
+          },
+          {
+            "id": "81c6f2df4d893cac",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -36,21 +50,21 @@
             }
           },
           {
-            "id": "f7c444c2b798b485",
+            "id": "8383efde1e743972",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Scenario/Chapters/Пролог/Пролог.md",
+                "file": "Characters/Дед Лис/Дед Лис.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Пролог"
+              "title": "Дед Лис"
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -220,7 +234,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 291.5
+    "width": 291.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -242,22 +257,34 @@
   },
   "active": "f7c444c2b798b485",
   "lastOpenFiles": [
+    "Characters/Дед Лис/Дед Лис.md",
+    "Characters/Дядя Лис/Дядя Лис.md",
+    "Characters/Отец Лис Годи/Отец Лис Годи.md",
+    "Characters/Дед Лис",
+    "Drawings/Drawing 09-19-2026.excalidraw.md",
     "План.md",
+    "Scenario/Chapters/Пролог/тест.md",
+    "Scenario/Chapters/Пролог/Пролог.md",
+    "Scenario/Chapters/Глава V.md",
+    "Pasted Image 20260109200646_892.png",
+    "Pasted Image 20260109200625_930.png",
+    "Pasted Image 20260109200617_718.png",
+    "Pasted Image 20260109200602_174.png",
+    "Pasted Image 20260109200549_351.png",
+    "Pasted Image 20260109200533_822.png",
+    "Pasted Image 20260109200516_390.png",
+    "Drawings",
     "inter_graph_v4.html",
     "interpret_mosaic_v4.html",
     "rune_mosaic_v4.html",
     "conflict-files-obsidian-git.md",
-    "Characters/Дядя Лис/Дядя Лис.md",
-    "Scenario/Chapters/Глава V.md",
     "Scenario/Chapters/Глава IV.md",
     "Scenario/Chapters/Глава III.md",
     "Scenario/Chapters/Глава II.md",
     "Scenario/Chapters/Глава I.md",
     "Scenario/Chapters/Пролог/Ритуал в прологе.md",
-    "Scenario/Chapters/Пролог/Пролог.md",
     "Characters/Призрак.md",
     "Characters/Йормунганд.md",
-    "Characters/Отец Лис Годи/Отец Лис Годи.md",
     "Characters/Лисенок/Лисенок.md",
     "Безвременье.md",
     "Лисенок.zip",
@@ -270,25 +297,14 @@
     "Locations/Некий большой водоем.md",
     "Locations/Родовой дом-нора Лисенка.md",
     "Locations/Селение общины лис.md",
-    "Scenario/Chapters/Пролог/Prologue puzzle Drawing.md",
     "Scenario/Chapters/Пролог",
     "Scenario/Chapters",
     "Locations",
-    "Characters/Мать Лиса/Мать Лиса.md",
-    "Characters/Мать Лиса",
-    "Characters/Лисенок",
     "remote-vault/Movies/covers/Samsara.png",
     "remote-vault/Attachments/Characters/Monk Protagonist/Sketch_1.png",
     "remote-vault/Movies/covers/LittleBuddha.png",
     "remote-vault/Untitled.canvas",
-    "remote-vault/Attachments/References/Characters/0f53dd6a995459b55342505a7c8cb01a.jpg",
     "remote-vault/Tasks Board/Без названия.canvas",
-    "remote-vault/Attachments/References/Poduction/beffio-studio-the-lost-land-vegetation-beffio.jpg",
-    "remote-vault/Attachments/References/Poduction/beffio-studio-the-lost-land-trees-beffio.jpg",
-    "remote-vault/Attachments/References/Poduction/beffio-studio-the-lost-land-rocks-beffio.jpg",
-    "remote-vault/Attachments/References/Poduction/beffio-studio-the-lost-land-monuments-beffio.jpg",
-    "remote-vault/Attachments/References/Poduction/3d-landscape-999.jpg",
-    "remote-vault/Attachments/References/Poduction/3d-landscape-888.jpg",
     "Без названия.canvas",
     "Knowledge Den/Без названия.canvas"
   ]
