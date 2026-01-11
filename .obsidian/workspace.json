@@ -36,6 +36,18 @@
             }
           },
           {
+            "id": "864f4f1e45981b7d",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Drawings/Drawing 09-19-2026.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Drawing 09-19-2026.excalidraw"
+            }
+          },
+          {
             "id": "81c6f2df4d893cac",
             "type": "leaf",
             "state": {
@@ -64,7 +76,7 @@
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -121,7 +133,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 326.5
+    "width": 326.5,
+    "collapsed": true
   },
   "right": {
     "id": "d7f9c94bd0887645",
@@ -255,16 +268,17 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "f7c444c2b798b485",
+  "active": "864f4f1e45981b7d",
   "lastOpenFiles": [
+    "Pasted Image 20260109200516_390.png",
+    "Drawings/Drawing 09-19-2026.excalidraw.md",
+    "Scenario/Chapters/Пролог/Пролог.md",
     "Scenario/Chapters/Глава V.md",
     "Characters/Дед Лис/Дед Лис.md",
     "conflict-files-obsidian-git.md",
     "Characters/Дядя Лис/Дядя Лис.md",
-    "Scenario/Chapters/Пролог/Пролог.md",
     "Characters/Отец Лис Годи/Отец Лис Годи.md",
     "Characters/Дед Лис",
-    "Drawings/Drawing 09-19-2026.excalidraw.md",
     "План.md",
     "Scenario/Chapters/Пролог/тест.md",
     "Pasted Image 20260109200646_892.png",
@@ -273,7 +287,6 @@
     "Pasted Image 20260109200602_174.png",
     "Pasted Image 20260109200549_351.png",
     "Pasted Image 20260109200533_822.png",
-    "Pasted Image 20260109200516_390.png",
     "Drawings",
     "inter_graph_v4.html",
     "interpret_mosaic_v4.html",
@@ -296,7 +309,6 @@
     "Locations/Место ритуала.md",
     "Locations/Некий большой водоем.md",
     "Locations/Родовой дом-нора Лисенка.md",
-    "Locations/Селение общины лис.md",
     "Scenario/Chapters/Пролог",
     "Scenario/Chapters",
     "Locations",
