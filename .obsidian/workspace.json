@@ -48,9 +48,23 @@
               "icon": "lucide-file",
               "title": "Пролог"
             }
+          },
+          {
+            "id": "addf5e2e9717fa77",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Scenario/Chapters/Пролог/Имена персонажей.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Имена персонажей"
+            }
           }
         ],
-        "currentTab": 2
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -240,11 +254,12 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "f7c444c2b798b485",
+  "active": "addf5e2e9717fa77",
   "lastOpenFiles": [
+    "Scenario/Chapters/Пролог/Пролог.md",
+    "Scenario/Chapters/Пролог/Имена персонажей.md",
     "Drawings/Pre-prologue.md",
     "Scenario/Chapters/Глава V.md",
-    "Scenario/Chapters/Пролог/Пролог.md",
     "Scenario/Chapters/Пролог/тест.md",
     "Pasted Image 20260109200646_892.png",
     "Pasted Image 20260109200625_930.png",
@@ -281,7 +296,6 @@
     "Locations/Истлевшая ладья.md",
     "Locations/Место ритуала.md",
     "Locations/Некий большой водоем.md",
-    "Locations/Родовой дом-нора Лисенка.md",
     "Scenario/Chapters/Пролог",
     "Scenario/Chapters",
     "Locations",
