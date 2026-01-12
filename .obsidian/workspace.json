@@ -107,8 +107,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 326.5,
-    "collapsed": true
+    "width": 326.5
   },
   "right": {
     "id": "d7f9c94bd0887645",
@@ -233,12 +232,7 @@
       "command-palette:Open command palette": false,
       "markdown-importer:Open format converter": false,
       "bases:Create new base": false,
-      "obsidian-excalidraw-plugin:New drawing": false,
-      "obsidian-kanban:Create new board": false,
-      "omnisearch:Omnisearch": false,
-      "templater-obsidian:Templater": false,
-      "markwhen:Create new Markwhen file": false,
-      "obsidian-git:Open Git source control": false
+      "omnisearch:Omnisearch": false
     }
   },
   "active": "f7c444c2b798b485",
