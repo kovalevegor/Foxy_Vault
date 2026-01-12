@@ -42,7 +42,7 @@
               "type": "markdown",
               "state": {
                 "file": "Scenario/Chapters/Пролог/Пролог.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
@@ -107,8 +107,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 326.5,
-    "collapsed": true
+    "width": 326.5
   },
   "right": {
     "id": "d7f9c94bd0887645",
