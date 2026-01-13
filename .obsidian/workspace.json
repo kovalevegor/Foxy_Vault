@@ -47,8 +47,7 @@
               "title": "Pre-prologue"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -170,13 +169,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Drawings/Pre-prologue.md",
+                "file": "Scenario/Chapters/Пролог/Пролог.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Структура Pre-prologue"
+              "title": "Структура Пролог"
             }
           }
         ],
@@ -238,7 +237,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "864f4f1e45981b7d",
+  "active": "77dce88cd4b51eb6",
   "lastOpenFiles": [
     "Drawings/Pre-prologue.md",
     "Scenario/Имена персонажей.md",
