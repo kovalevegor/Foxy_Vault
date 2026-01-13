@@ -22,17 +22,15 @@
             }
           },
           {
-            "id": "4f64d3968499ca80",
+            "id": "676e11b317ff032e",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "excalidraw",
               "state": {
-                "file": "Scenario/Chapters/Пролог/Пролог.md",
-                "mode": "source",
-                "source": false
+                "file": "Drawings/Pre-prologue.md"
               },
-              "icon": "lucide-file",
-              "title": "Пролог"
+              "icon": "excalidraw-icon",
+              "title": "Pre-prologue"
             }
           },
           {
@@ -48,21 +46,8 @@
               "icon": "lucide-file",
               "title": "Имена персонажей"
             }
-          },
-          {
-            "id": "864f4f1e45981b7d",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Drawings/Pre-prologue.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "Pre-prologue"
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -252,12 +237,12 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "4f64d3968499ca80",
+  "active": "77dce88cd4b51eb6",
   "lastOpenFiles": [
-    "Scenario/Chapters/Пролог/Предыстория пролога.md",
-    "Scenario/Chapters/Пролог/Пролог.md",
     "Drawings/Pre-prologue.md",
     "Scenario/Имена персонажей.md",
+    "Scenario/Chapters/Пролог/Пролог.md",
+    "Scenario/Chapters/Пролог/Предыстория пролога.md",
     "Characters/Дед Лис/Дед Лис.md",
     "Scenario/Chapters/Глава V.md",
     "conflict-files-obsidian-git.md",
