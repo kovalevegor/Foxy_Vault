@@ -33,7 +33,8 @@
               "title": "Pre-prologue"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -155,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Scenario/Chapters/Пролог/Пролог.md",
+                "file": "Drawings/Pre-prologue.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Структура Пролог"
+              "title": "Структура Pre-prologue"
             }
           }
         ],
@@ -223,10 +224,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "77dce88cd4b51eb6",
+  "active": "676e11b317ff032e",
   "lastOpenFiles": [
-    "Drawings/Pre-prologue.md",
     "Scenario/Chapters/Пролог/Пролог.md",
+    "Drawings/Pre-prologue.md",
     "Scenario/Имена персонажей.md",
     "Scenario/Chapters/Пролог/Предыстория пролога.md",
     "Characters/Дед Лис/Дед Лис.md",
