@@ -250,7 +250,7 @@ button:disabled{
 // По 2 подсказки на каждую улику
 const CLUES = [
   {id:'c1', artifact:0, alignment:'naive', title:'Подсказка 1-Н'},
-  {id:'c2', artifact:0, alignment:'cynic', title:'Подсказка 1-Ц'},
+  {id:'c2', artifact:0, alignment:'cynic', title:'Детская руна Йотунхейма'},
   
   {id:'c3', artifact:1, alignment:'naive', title:'Подсказка 2-Н'},
   {id:'c4', artifact:1, alignment:'cynic', title:'Подсказка 2-Ц'},
@@ -300,7 +300,7 @@ function createUI(){
   main.style.left=(W/2-90)+'px';
   main.style.top=(H/2-90)+'px';
   main.innerHTML=`
-    <div>Трактовка<br>главы</div>
+    <div>Предал ли<br>Сигурд отца?</div>
     <div id="mainState" style="margin-top:8px;font-size:13px;color:#ffd"></div>`;
   board.appendChild(main);
 
