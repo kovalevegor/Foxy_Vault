@@ -101,6 +101,18 @@
             background: #9b59b6;
         }
 
+        .cell.ghost-trail-red {
+            background: #4a1a1a;
+        }
+
+        .cell.ghost-trail-blue {
+            background: #1a1a4a;
+        }
+
+        .cell.ghost-trail-purple {
+            background: #3a1a3a;
+        }
+
         .sidebar {
             background: #16213e;
             padding: 20px;
@@ -187,11 +199,33 @@
             font-size: 16px;
             width: 100%;
             transition: all 0.2s;
+            margin-bottom: 10px;
         }
 
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             background: #ee5555;
             transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn.secondary {
+            background: #555;
+        }
+
+        .btn.secondary:hover:not(:disabled) {
+            background: #666;
+        }
+
+        .btn.trap-escape {
+            background: #e67e22;
+        }
+
+        .btn.trap-escape:hover {
+            background: #d35400;
         }
 
         .legend {
@@ -268,8 +302,9 @@
                 </div>
 
                 <div class="controls">
+                    <button class="btn trap-escape" id="escape-trap" style="display: none;">🕳️ Освободиться из ловушки</button>
                     <button class="btn" id="skip-turn">Пропустить ход (активировать save point)</button>
-                    <button class="btn" id="reset" style="margin-top: 10px; background: #555;">Новая игра</button>
+                    <button class="btn secondary" id="reset">Новая игра</button>
                 </div>
 
                 <div class="legend">
@@ -305,9 +340,9 @@
             startPos: { x: CENTER, y: CENTER },
             lastSavePoint: null,
             ghosts: [
-                { x: 1, y: 1, type: 'red', emoji: '🔴', frozen: 0 },
-                { x: 7, y: 1, type: 'blue', emoji: '🔵', frozen: 0 },
-                { x: 4, y: 7, type: 'purple', emoji: '🟣', frozen: 0 }
+                { x: 1, y: 1, type: 'red', emoji: '🔴', frozen: 0, prevX: 1, prevY: 1 },
+                { x: 7, y: 1, type: 'blue', emoji: '🔵', frozen: 0, prevX: 7, prevY: 1 },
+                { x: 4, y: 7, type: 'purple', emoji: '🟣', frozen: 0, prevX: 4, prevY: 7 }
             ],
             walls: [],
             traps: [],
@@ -361,6 +396,13 @@
                     const savePoint = gameState.savePoints.find(s => s.x === x && s.y === y);
                     const exit = gameState.exits.find(e => e.x === x && e.y === y);
                     
+                    // Подсветка предыдущих позиций призраков
+                    gameState.ghosts.forEach(ghost => {
+                        if (ghost.prevX === x && ghost.prevY === y && !(ghost.x === x && ghost.y === y)) {
+                            cell.classList.add(`ghost-trail-${ghost.type}`);
+                        }
+                    });
+                    
                     if (wall) {
                         cell.classList.add('wall');
                         cell.textContent = '🟫';
@@ -404,9 +446,22 @@
             });
             
             document.getElementById('turn').textContent = gameState.turn;
+            
+            // Управление кнопкой освобождения из ловушки
+            const escapeBtn = document.getElementById('escape-trap');
+            if (gameState.inTrap) {
+                escapeBtn.style.display = 'block';
+            } else {
+                escapeBtn.style.display = 'none';
+            }
         }
 
         function handleCellClick(x, y) {
+            if (gameState.inTrap) {
+                updateStatus('Вы в ловушке! Нажмите кнопку "Освободиться"');
+                return;
+            }
+            
             if (gameState.activeSkill) {
                 handleSkillClick(x, y);
                 return;
@@ -421,13 +476,6 @@
         }
 
         function moveFox(dx, dy) {
-            if (gameState.inTrap) {
-                gameState.inTrap = false;
-                updateStatus('Вы освободились из ловушки');
-                respawnFox();
-                return;
-            }
-            
             const newX = gameState.fox.x + dx;
             const newY = gameState.fox.y + dy;
             
@@ -453,9 +501,9 @@
             
             const trap = gameState.traps.find(t => t.x === gameState.fox.x && t.y === gameState.fox.y);
             if (trap) {
-                updateStatus('Вы попали в ловушку! Пропустите следующий ход.');
+                updateStatus('Вы попали в ловушку! Нажмите кнопку "Освободиться"');
                 gameState.inTrap = true;
-                createBoard();
+                updateBoard();
                 return;
             }
             
@@ -463,6 +511,12 @@
         }
 
         function endTurn() {
+            // Сохраняем текущие позиции призраков как предыдущие
+            gameState.ghosts.forEach(ghost => {
+                ghost.prevX = ghost.x;
+                ghost.prevY = ghost.y;
+            });
+            
             createBoard();
             
             moveGhosts();
@@ -484,6 +538,7 @@
             
             if (ghost.frozen > 0) {
                 ghost.frozen--;
+                updateStatus(`${ghost.emoji} заморожен. Осталось ходов: ${ghost.frozen}`);
                 return;
             }
             
@@ -528,6 +583,7 @@
             } else {
                 gameState.fox = {...gameState.startPos};
             }
+            gameState.inTrap = false;
             createBoard();
         }
 
@@ -541,7 +597,19 @@
             document.getElementById('modal').classList.add('show');
         }
 
+        // Кнопка освобождения из ловушки
+        document.getElementById('escape-trap').addEventListener('click', () => {
+            gameState.inTrap = false;
+            updateStatus('Вы освободились из ловушки! Возвращение на save point...');
+            respawnFox();
+        });
+
         document.getElementById('skip-turn').addEventListener('click', () => {
+            if (gameState.inTrap) {
+                updateStatus('Вы в ловушке! Сначала освободитесь');
+                return;
+            }
+            
             const savePoint = gameState.savePoints.find(s => s.x === gameState.fox.x && s.y === gameState.fox.y);
             if (savePoint) {
                 gameState.lastSavePoint = {...gameState.fox};
@@ -563,9 +631,9 @@
                 startPos: { x: CENTER, y: CENTER },
                 lastSavePoint: null,
                 ghosts: [
-                    { x: 1, y: 1, type: 'red', emoji: '🔴', frozen: 0 },
-                    { x: 7, y: 1, type: 'blue', emoji: '🔵', frozen: 0 },
-                    { x: 4, y: 7, type: 'purple', emoji: '🟣', frozen: 0 }
+                    { x: 1, y: 1, type: 'red', emoji: '🔴', frozen: 0, prevX: 1, prevY: 1 },
+                    { x: 7, y: 1, type: 'blue', emoji: '🔵', frozen: 0, prevX: 7, prevY: 1 },
+                    { x: 4, y: 7, type: 'purple', emoji: '🟣', frozen: 0, prevX: 4, prevY: 7 }
                 ],
                 walls: [],
                 traps: [],
@@ -587,6 +655,8 @@
 
         // Keyboard controls
         document.addEventListener('keydown', (e) => {
+            if (gameState.inTrap) return;
+            
             const moves = {
                 'ArrowUp': {dx: 0, dy: -1},
                 'ArrowDown': {dx: 0, dy: 1},
@@ -608,6 +678,10 @@
         document.querySelectorAll('.skill-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 if (this.disabled) return;
+                if (gameState.inTrap) {
+                    updateStatus('Вы в ловушке! Сначала освободитесь');
+                    return;
+                }
                 
                 const skillId = this.id.replace('skill-', '');
                 activateSkill(skillId, this);
@@ -623,31 +697,34 @@
                 'dash': 'Выберите направление для рывка (3 клетки)',
                 'jump': 'Выберите клетку в радиусе 2',
                 'ghost': 'Выберите стену для прохода',
-                'banish': 'Изгнание недоступно (призраки неуничтожимы)',
+                'banish': 'Выберите призрака для изгнания',
                 'freeze': 'Выберите призрака для заморозки',
                 'swap': 'Выберите призрака для обмена местами'
             };
             
             updateStatus(messages[skillId]);
-            
-            if (skillId === 'banish') {
-                gameState.activeSkill = null;
-                btn.classList.remove('active');
-            }
         }
 
         function handleSkillClick(x, y) {
             const skill = gameState.activeSkill;
             let success = false;
             
-            if (skill === 'freeze' || skill === 'swap') {
+            if (skill === 'banish' || skill === 'freeze' || skill === 'swap') {
                 const ghost = gameState.ghosts.find(g => g.x === x && g.y === y);
                 if (!ghost) {
                     updateStatus('Выберите призрака!');
                     return;
                 }
                 
-                if (skill === 'freeze') {
+                if (skill === 'banish') {
+                    // Временно убираем призрака за пределы поля
+                    ghost.x = -10;
+                    ghost.y = -10;
+                    ghost.prevX = -10;
+                    ghost.prevY = -10;
+                    updateStatus('Призрак изгнан навсегда!');
+                    success = true;
+                } else if (skill === 'freeze') {
                     ghost.frozen = 3;
                     updateStatus('Призрак заморожен на 3 хода!');
                     success = true;
@@ -656,6 +733,8 @@
                     gameState.fox = {x: ghost.x, y: ghost.y};
                     ghost.x = temp.x;
                     ghost.y = temp.y;
+                    ghost.prevX = temp.x;
+                    ghost.prevY = temp.y;
                     updateStatus('Вы поменялись местами с призраком!');
                     success = true;
                 }
