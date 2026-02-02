@@ -54,15 +54,23 @@
 Гримлис Мрачный и лисенок Бо выходят из левого края сцены. 
 
 
+<mark>выделенный маркером (часто жёлтый)</mark>
 
+<kbd>Ctrl + C</kbd> - для клавиш
 
-<span style="color: red;">красный текст</span>
-<span style="color: #FF5733;">оранжевый текст</span>
-<span style="color: rgb(0, 150, 255);">синий текст</span>
-<span style="color: rgba(0, 200, 0, 0.7);">зелёный с прозрачностью</span>
+<code>код</code> - альтернатива для кода
 
+<samp>пример вывода программы</samp>
 
+<var>переменная</var>
 
+<cite>цитата или название работы</cite>
+
+<dfn>термин</dfn>
+
+<abbr title="HyperText Markup Language">HTML</abbr> - аббревиатура
+
+<ruby>漢<rt>かん</rt>字<rt>じ</rt></ruby> - ruby-аннотации
 
 
 
