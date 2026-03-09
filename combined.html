@@ -1,0 +1,1104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<title>Граф Интерпретации — Лабиринт</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap');
+
+:root {
+  --black:#050505; --yellow:#f5c842; --yellow-dim:#c8962a;
+  --red:#c0392b; --red-glow:rgba(192,57,43,0.4);
+  --green:#27ae60; --green-glow:rgba(39,174,96,0.4);
+  --wall-edge:#2e1e1e; --fog:#050505;
+  --text:#8a7060; --text-bright:#c4a882;
+  --naive-col:#27ae60; --naive-glow:rgba(39,174,96,0.35);
+  --cynic-col:#c0392b; --cynic-glow:rgba(192,57,43,0.35);
+  --conflict-col:#d05010; --conflict-glow:rgba(208,80,16,0.45);
+  --cs:58px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{width:100%;height:100%;background:var(--black);color:var(--text-bright);
+  font-family:'IM Fell English',serif;overflow:hidden;user-select:none;}
+
+body::before{content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 4px);
+  pointer-events:none;z-index:300;}
+
+/* ═══════════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════════ */
+#screen-graph,#screen-maze{
+  position:fixed;inset:0;
+  transition:opacity 0.45s ease;
+}
+#screen-graph{z-index:10;}
+#screen-maze{z-index:20;pointer-events:none;opacity:0;}
+#screen-maze.active{pointer-events:all;opacity:1;}
+
+/* ═══════════════════════════════════════════
+   GRAPH SCREEN
+═══════════════════════════════════════════ */
+.app{display:grid;grid-template-columns:1fr 300px;height:100vh;}
+
+.playfield{display:flex;flex-direction:column;padding:16px;gap:12px;}
+.controls{display:flex;gap:10px;align-items:center;}
+.page-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.55em;
+  color:var(--text);text-transform:uppercase;opacity:0.45;flex:1;text-align:center;}
+.board-wrap{flex:1;display:flex;align-items:center;justify-content:center;}
+.board{position:relative;width:min(90vmin,100%);aspect-ratio:1/1;
+  background:radial-gradient(circle at center,#0c0a07,var(--black));
+  border:1px solid var(--wall-edge);border-radius:4px;overflow:hidden;}
+
+/* Graph nodes */
+.node{position:absolute;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;text-align:center;cursor:pointer;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+  font-family:'Cinzel',serif;letter-spacing:0.05em;}
+.node:hover{transform:scale(1.06);}
+
+.artifact{width:130px;height:130px;border:2px solid var(--wall-edge);
+  font-size:11px;flex-direction:column;background:#0c0a07;color:var(--text);}
+.artifact.unknown{border-color:#3a2e22;color:var(--text);}
+.artifact.naive{border-color:var(--naive-col);color:var(--naive-col);
+  box-shadow:0 0 18px var(--naive-glow),inset 0 0 20px rgba(39,174,96,0.06);}
+.artifact.cynic{border-color:var(--cynic-col);color:var(--cynic-col);
+  box-shadow:0 0 18px var(--cynic-glow),inset 0 0 20px rgba(192,57,43,0.06);}
+.artifact.conflicted{border-color:var(--conflict-col);
+  box-shadow:0 0 22px var(--conflict-glow),inset 0 0 20px rgba(208,80,16,0.07);}
+.artifact.locked{cursor:default;}
+.artifact.locked:hover{transform:none;}
+
+/* Locked indicator ring */
+.artifact.locked.naive{box-shadow:0 0 26px var(--naive-glow),0 0 0 2px var(--naive-col),inset 0 0 20px rgba(39,174,96,0.08);}
+.artifact.locked.cynic{box-shadow:0 0 26px var(--cynic-glow),0 0 0 2px var(--cynic-col),inset 0 0 20px rgba(192,57,43,0.08);}
+
+.main{width:160px;height:160px;border:2px solid var(--yellow-dim);background:#0e0c08;
+  flex-direction:column;font-size:11px;color:var(--yellow-dim);
+  box-shadow:0 0 24px rgba(200,150,42,0.15),inset 0 0 28px rgba(245,200,66,0.04);
+  animation:main-flicker 4s ease-in-out infinite;}
+@keyframes main-flicker{
+  0%,100%{box-shadow:0 0 24px rgba(200,150,42,0.15),inset 0 0 28px rgba(245,200,66,0.04);}
+  50%{box-shadow:0 0 34px rgba(200,150,42,0.25),inset 0 0 36px rgba(245,200,66,0.07);}}
+
+.clue{width:86px;height:86px;border:1px solid #2a1e14;font-size:10px;
+  background:#080706;color:#4a3a2a;letter-spacing:0.04em;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,color .18s ease;}
+.clue.found.naive-clue{border-color:var(--naive-col);color:var(--naive-col);box-shadow:0 0 12px var(--naive-glow);}
+.clue.found.cynic-clue{border-color:var(--cynic-col);color:var(--cynic-col);box-shadow:0 0 12px var(--cynic-glow);}
+
+/* Sidebar */
+.sidebar{background:#070605;border-left:1px solid var(--wall-edge);
+  padding:20px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
+.sidebar-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.5em;
+  color:var(--text);text-transform:uppercase;opacity:0.4;text-align:center;
+  padding-bottom:10px;border-bottom:1px solid var(--wall-edge);}
+.panel{border:1px solid var(--wall-edge);padding:12px;background:#060504;}
+.panel-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.35em;
+  text-transform:uppercase;color:var(--text);opacity:0.5;margin-bottom:8px;}
+.small{font-size:11px;color:var(--text);line-height:1.6;font-family:'IM Fell English',serif;}
+.small ul{padding-left:14px;}.small li{margin-bottom:4px;}
+.radio-row{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+.radio-row label{display:flex;align-items:center;gap:8px;cursor:pointer;
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--text);transition:color .15s;}
+.radio-row label:hover{color:var(--text-bright);}
+.radio-row input[type=radio]{accent-color:var(--yellow-dim);width:12px;height:12px;}
+.verdict-text{font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.18em;color:var(--text-bright);}
+.verdict-text.naive{color:var(--naive-col);text-shadow:0 0 10px var(--naive-glow);}
+.verdict-text.cynic{color:var(--cynic-col);text-shadow:0 0 10px var(--cynic-glow);}
+.conflict-badge{display:inline-block;font-family:'Cinzel',serif;font-size:8px;
+  letter-spacing:0.2em;text-transform:uppercase;color:var(--conflict-col);
+  border:1px solid var(--conflict-col);padding:2px 6px;margin-left:6px;opacity:0.9;}
+.warning{font-size:10px;color:var(--conflict-col);margin-top:4px;
+  font-family:'Cinzel',serif;letter-spacing:0.1em;}
+.art-row{display:flex;justify-content:space-between;align-items:center;
+  padding:6px 0;border-bottom:1px solid #110d08;}
+.art-row:last-child{border-bottom:none;}
+
+/* Graph buttons */
+button{background:none;border:1px solid rgba(140,100,60,0.28);color:var(--text-bright);
+  font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.35em;text-transform:uppercase;
+  padding:7px 14px;cursor:pointer;transition:border-color .2s,color .2s,box-shadow .2s;}
+button:hover:not(:disabled){border-color:var(--yellow-dim);color:var(--yellow);
+  box-shadow:0 0 14px rgba(245,200,66,0.08);}
+button:disabled{opacity:0.3;cursor:not-allowed;}
+button.finish-btn{width:100%;padding:9px;margin-top:4px;letter-spacing:0.3em;}
+
+/* ═══════════════════════════════════════════
+   MAZE SCREEN — full labyrinth styles
+═══════════════════════════════════════════ */
+#maze-root{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;background:var(--black);
+}
+#maze-title-bar{
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.4em;
+  color:var(--text);text-transform:uppercase;opacity:0.4;
+}
+#maze-artifact-label{
+  font-family:'IM Fell English',serif;font-size:13px;letter-spacing:0.12em;
+  color:var(--yellow-dim);opacity:0.7;font-style:italic;
+}
+#hud{display:flex;justify-content:space-between;align-items:center;width:calc(var(--cs)*9);}
+.hud-candle{display:flex;align-items:center;gap:7px;font-size:11px;letter-spacing:0.1em;}
+.candle-dot{width:7px;height:7px;border-radius:50%;}
+.candle-dot.red{background:var(--red);box-shadow:0 0 5px var(--red);}
+.candle-dot.green{background:var(--green);box-shadow:0 0 5px var(--green);}
+.hud-candle.red{color:#9a3838;}.hud-candle.green{color:#387058;}
+#steps-counter{font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.3em;color:var(--text);opacity:0.45;}
+#candle-status{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.18em;color:var(--yellow-dim);opacity:0.7;min-width:110px;text-align:center;}
+#candle-status.out{color:#553322;}
+#game-container{position:relative;width:calc(var(--cs)*9);height:calc(var(--cs)*9);}
+#grid{display:grid;grid-template-columns:repeat(9,var(--cs));grid-template-rows:repeat(9,var(--cs));width:100%;height:100%;}
+.cell{position:relative;width:var(--cs);height:var(--cs);background:var(--black);transition:background 0.28s ease,box-shadow 0.28s ease;}
+.corridor{position:absolute;inset:0;background:var(--black);transition:background 0.28s ease,border-color 0.12s ease;}
+.wall-n{border-top:3px solid var(--wall-edge);}
+.wall-s{border-bottom:3px solid var(--wall-edge);}
+.wall-w{border-left:3px solid var(--wall-edge);}
+.wall-e{border-right:3px solid var(--wall-edge);}
+.cell.dark{background:var(--fog)!important;box-shadow:none!important;}
+.cell.dark .corridor{background:var(--fog);border-color:var(--fog)!important;}
+.cell.dark .exit-candle,.cell.dark .static-candle{display:block;}
+.cell.lit{background:#0c0a07;}.cell.lit .corridor{background:#0c0a07;}
+.cell.player-cell{background:#131008!important;box-shadow:inset 0 0 28px rgba(245,200,66,0.13)!important;}
+.cell.exit-left{box-shadow:inset 0 0 22px var(--red-glow),0 0 16px var(--red-glow)!important;}
+.cell.exit-right{box-shadow:inset 0 0 22px var(--green-glow),0 0 16px var(--green-glow)!important;}
+.cell.static-lit{box-shadow:inset 0 0 16px rgba(245,200,66,0.09)!important;}
+.static-candle{position:absolute;width:8px;height:8px;border-radius:50%;
+  transform:translate(-50%,-50%);top:50%;left:50%;pointer-events:none;z-index:7;}
+.static-candle.unlit{background:#251a0d;box-shadow:0 0 2px 1px rgba(40,20,5,0.5);}
+.static-candle.lit-yellow{background:radial-gradient(circle,#ffe090,var(--yellow));
+  box-shadow:0 0 5px 2px rgba(245,200,66,0.75),0 0 14px 5px rgba(245,200,66,0.28);
+  animation:flicker-y 2.2s ease-in-out infinite;}
+.exit-candle{position:absolute;width:9px;height:9px;border-radius:50%;
+  transform:translate(-50%,-50%);top:50%;left:50%;pointer-events:none;z-index:8;}
+.exit-candle.red{background:radial-gradient(circle,#ff6b5b,var(--red));
+  box-shadow:0 0 5px 2px rgba(192,57,43,0.9),0 0 16px 6px rgba(192,57,43,0.3);
+  animation:flicker-r 2.5s ease-in-out infinite;}
+.exit-candle.green{background:radial-gradient(circle,#5bf58a,var(--green));
+  box-shadow:0 0 5px 2px rgba(39,174,96,0.9),0 0 16px 6px rgba(39,174,96,0.3);
+  animation:flicker-g 2.8s ease-in-out infinite;}
+#player-token{position:absolute;width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#ffe8a0,var(--yellow) 50%,var(--yellow-dim) 100%);
+  box-shadow:0 0 7px 3px rgba(245,200,66,0.65),0 0 18px 6px rgba(245,200,66,0.25),0 0 44px 13px rgba(245,200,66,0.08);
+  transform:translate(-50%,-50%);transition:left 0.15s ease,top 0.15s ease;
+  pointer-events:none;z-index:10;animation:flicker-y 3s ease-in-out infinite;}
+#player-token::after{content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  width:4px;height:9px;background:linear-gradient(to top,var(--yellow),rgba(255,200,50,0.2),transparent);
+  border-radius:50% 50% 30% 30%;animation:flame 0.75s ease-in-out infinite alternate;}
+#player-token.candle-out{background:#181008;box-shadow:0 0 3px 1px rgba(40,20,5,0.3);animation:none;}
+#player-token.candle-out::after{display:none;}
+#monster-token{position:absolute;width:24px;height:24px;transform:translate(-50%,-50%);
+  transition:left 0.2s ease,top 0.2s ease;pointer-events:none;z-index:9;display:none;}
+#monster-token svg{width:100%;height:100%;}
+#monster-token.chasing{animation:mpulse 0.55s ease-in-out infinite alternate;}
+#monster-token.force-visible{display:block!important;}
+@keyframes mpulse{from{filter:drop-shadow(0 0 3px rgba(180,30,30,0.6));}to{filter:drop-shadow(0 0 9px rgba(220,50,50,1));}}
+@keyframes flicker-y{
+  0%,100%{box-shadow:0 0 7px 3px rgba(245,200,66,0.65),0 0 18px 6px rgba(245,200,66,0.25),0 0 44px 13px rgba(245,200,66,0.08);}
+  35%{box-shadow:0 0 5px 2px rgba(245,200,66,0.5),0 0 13px 4px rgba(245,200,66,0.18),0 0 34px 10px rgba(245,200,66,0.05);}
+  65%{box-shadow:0 0 9px 4px rgba(245,200,66,0.75),0 0 22px 8px rgba(245,200,66,0.3),0 0 54px 16px rgba(245,200,66,0.1);}}
+@keyframes flame{from{height:7px;opacity:0.9;}to{height:12px;opacity:0.5;transform:translateX(-47%) skewX(6deg);}}
+@keyframes flicker-r{0%,100%{opacity:1;}40%{opacity:0.7;}70%{opacity:0.88;}}
+@keyframes flicker-g{0%,100%{opacity:1;}30%{opacity:0.76;}65%{opacity:0.92;}}
+#status-bar{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.22em;color:var(--text);opacity:0.4;text-align:center;height:14px;}
+#status-bar.danger{color:#c03030;opacity:1;animation:dblink 0.75s ease-in-out infinite alternate;}
+#status-bar.chase{color:#d05010;opacity:0.95;}
+@keyframes dblink{from{opacity:0.55;}to{opacity:1;}}
+#controls-hint{font-size:10px;letter-spacing:0.18em;color:var(--text);opacity:0.28;text-align:center;font-family:'Cinzel',serif;}
+#rune-btn{background:none;border:1px solid rgba(140,80,200,0.55);color:#c090f0;
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;
+  padding:7px 18px;cursor:pointer;transition:border-color .2s,color .2s,box-shadow .2s;
+  margin-top:4px;text-shadow:0 0 10px rgba(180,100,255,0.4);}
+#rune-btn:not(:disabled):hover{border-color:#d090ff;color:#e0b0ff;
+  box-shadow:0 0 20px rgba(180,80,255,0.35);text-shadow:0 0 14px rgba(200,120,255,0.7);}
+#rune-btn:disabled{opacity:0.18;cursor:default;border-color:rgba(60,40,80,0.18);color:#3a2a4a;text-shadow:none;}
+
+/* Maze overlay */
+#overlay{position:fixed;inset:0;background:rgba(5,5,5,0.97);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:26px;z-index:100;opacity:0;pointer-events:none;transition:opacity 0.55s ease;}
+#overlay.active{opacity:1;pointer-events:all;}
+#overlay-title{font-family:'Cinzel',serif;font-size:26px;letter-spacing:0.3em;text-transform:uppercase;color:var(--text-bright);}
+#overlay-sub{font-family:'IM Fell English',serif;font-size:13px;letter-spacing:0.14em;opacity:0.45;color:var(--text-bright);}
+.overlay-btn{background:none;border:1px solid rgba(140,100,60,0.28);color:var(--text-bright);
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.4em;text-transform:uppercase;
+  padding:11px 30px;cursor:pointer;transition:border-color .2s,color .2s,box-shadow .2s;}
+.overlay-btn:hover{border-color:var(--yellow-dim);color:var(--yellow);box-shadow:0 0 18px rgba(245,200,66,0.1);}
+#overlay.win-left #overlay-title{color:var(--red);text-shadow:0 0 28px var(--red-glow);}
+#overlay.win-right #overlay-title{color:var(--green);text-shadow:0 0 28px var(--green-glow);}
+#overlay.start #overlay-title{color:var(--yellow-dim);text-shadow:0 0 26px rgba(245,200,66,0.2);}
+#overlay.death #overlay-title{color:#6a1010;text-shadow:0 0 30px rgba(80,10,10,0.9);}
+#overlay.death #overlay-sub{color:#5a2020;}
+.overlay-btn-row{display:flex;gap:16px;}
+@keyframes bump{
+  0%{transform:translate(0,0) translate(-50%,-50%);}
+  30%{transform:var(--bd) translate(-50%,-50%);}
+  100%{transform:translate(0,0) translate(-50%,-50%);}}
+.bump{animation:bump 0.14s ease;}
+</style>
+</head>
+<body>
+
+<!-- ═══ GRAPH SCREEN ═══ -->
+<div id="screen-graph">
+<div class="app">
+  <div class="playfield">
+    <div class="controls">
+      <button id="resetBtn">Сброс</button>
+      <div class="page-title">Граф Интерпретации</div>
+      <button id="randomBtn">Случайные подсказки</button>
+    </div>
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+    </div>
+  </div>
+  <aside class="sidebar">
+    <div class="sidebar-title">Анализ</div>
+    <div class="panel">
+      <div class="panel-label">Инструкция</div>
+      <div class="small"><ul>
+        <li>Нажмите подсказку, чтобы открыть её.</li>
+        <li>Правая кнопка мыши — читать описание.</li>
+        <li>Улики 1 и 2 взаимосвязаны.</li>
+        <li>Две подсказки на улику → запускает лабиринт.</li>
+        <li>Одна подсказка → трактовка фиксируется сразу.</li>
+        <li>Зафиксированную улику изменить нельзя.</li>
+      </ul></div>
+    </div>
+    <div class="panel">
+      <div class="panel-label">Центральный вопрос</div>
+      <div class="radio-row">
+        <label><input type="radio" name="question" value="naive" id="qNaive" checked>Наивный ответ</label>
+        <label><input type="radio" name="question" value="cynic" id="qCynic">Циничный ответ</label>
+      </div>
+      <button class="finish-btn" id="finishBtn">Завершить главу</button>
+    </div>
+    <div class="panel">
+      <div class="panel-label">Улики</div>
+      <div id="artList"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-label">Найденные подсказки</div>
+      <div id="foundList" class="small">—</div>
+    </div>
+    <div class="panel">
+      <div class="panel-label">Описание</div>
+      <div id="dynamicText" class="small">—</div>
+    </div>
+    <div class="panel">
+      <div class="panel-label">Вердикт</div>
+      <div class="verdict-text" id="verdict">—</div>
+      <div class="small" id="verDetails" style="margin-top:6px"></div>
+    </div>
+  </aside>
+</div>
+</div>
+
+<!-- ═══ MAZE SCREEN ═══ -->
+<div id="screen-maze">
+  <div id="maze-root">
+    <div id="maze-title-bar">The Labyrinth</div>
+    <div id="maze-artifact-label"></div>
+    <div id="hud">
+      <div class="hud-candle red"><div class="candle-dot red"></div>Циничная</div>
+      <div id="candle-status">свеча горит</div>
+      <div id="steps-counter">Шагов: 0</div>
+      <div class="hud-candle green"><div class="candle-dot green"></div>Наивная</div>
+    </div>
+    <div id="game-container">
+      <div id="grid"></div>
+      <div id="player-token"></div>
+      <div id="monster-token">
+        <svg viewBox="0 0 24 24" fill="none">
+          <ellipse cx="12" cy="14" rx="7.5" ry="8.5" fill="#140606"/>
+          <ellipse cx="12" cy="14" rx="7.5" ry="8.5" fill="none" stroke="#7a1212" stroke-width="1.2"/>
+          <ellipse cx="9" cy="12" rx="2" ry="2.4" fill="#bb1e1e" opacity="0.92"/>
+          <ellipse cx="15" cy="12" rx="2" ry="2.4" fill="#bb1e1e" opacity="0.92"/>
+          <ellipse cx="9" cy="12.3" rx="0.8" ry="1" fill="#ff3333"/>
+          <ellipse cx="15" cy="12.3" rx="0.8" ry="1" fill="#ff3333"/>
+          <path d="M8.5 17.5 Q12 15.5 15.5 17.5" stroke="#7a1212" stroke-width="0.9" fill="none"/>
+          <path d="M4.5 5 Q6.5 2 8.5 5 Q10 2.5 12 5 Q14 2.5 15.5 5 Q17.5 2 19.5 5" stroke="#4a0808" stroke-width="1.1" fill="none"/>
+        </svg>
+      </div>
+    </div>
+    <div id="status-bar"></div>
+    <div id="controls-hint">W A S D — движение</div>
+    <button id="rune-btn" disabled onclick="activateRune()">⟁ Руна отпугивания &nbsp;[R]</button>
+  </div>
+
+  <!-- Maze overlay (entry/death/result) -->
+  <div id="overlay">
+    <div id="overlay-title"></div>
+    <div id="overlay-sub"></div>
+    <div id="overlay-btns" class="overlay-btn-row"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// GRAPH DATA
+// ═══════════════════════════════════════════════════════════
+const CLUES = [
+  {id:'c2', artifact:0, alignment:'naive',  title:'Детский рисунок Сигурда на Черном Стяге'},
+  {id:'c3', artifact:1, alignment:'naive',  title:'Расколотый детский щит Сигурда'},
+  {id:'c4', artifact:1, alignment:'cynic',  title:'Детские следы, ведущие к реке'},
+  {id:'c5', artifact:2, alignment:'cynic',  title:'Высокая строительная лестница'},
+  {id:'c6', artifact:2, alignment:'naive',  title:'Детский рисунок великана'},
+  {id:'c1', artifact:0, alignment:'cynic',  title:'Руны Ётунхейма вокруг кострища'}
+];
+const CLUE_TEXTS = {
+  'c1':'На коре дерева рядом с костром начертана детской рукой та же руна, что и на стяге.',
+  'c2':'К руне на стяге пририсован краской детский рисунок лошадки Сигурда.',
+  'c3':'В стороне валяется сломанный детский щит Сигурда.',
+  'c4':'От копья Сигурда в сторону реки ведут детские лисьи следы.',
+  'c5':'В стороне есть строительная лестница, на которую взбирались строители столпа.',
+  'c6':'Рядом со столпом лежит грубый детский рисунок углем, изображающий великана.'
+};
+const ARTIFACT_TITLES=['Черный стяг ётунов','Копье Сигурда','Огромный сигнальный столп'];
+const ARTIFACT_TEXTS={
+  0:{unknown:'Черный стяг с руной ётунов.',
+     naive:'Сигурд дорисовал любимую игрушку, не понимая значения символа.',
+     cynic:'Сигурд хотел призвать ётунов, нарисовав руну их страны.'},
+  1:{unknown:'Старое копье Сигурда у кострища. Чистое.',
+     naive:'Во время нападения Сигурд прикрывался щитом.',
+     cynic:'Сигурд бросил оружие и убежал в сторону реки.'},
+  2:{unknown:'Огромный столп с рунами.',
+     naive:'Столп возвели люди для проплывающих торговцев.',
+     cynic:'Столп возвели ётуны — руны на уровне их роста.'}
+};
+const LINKED_ARTIFACTS=[0,1];
+const numArtifacts=3;
+
+// Graph state
+let found={}, artifactState={}, artifactLocked={}, chapterFinished=false;
+CLUES.forEach(c=>found[c.id]=false);
+for(let i=0;i<numArtifacts;i++){artifactState[i]='unknown';artifactLocked[i]=false;}
+
+const board=document.getElementById('board');
+
+// ═══════════════════════════════════════════════════════════
+// GRAPH — UI BUILD
+// ═══════════════════════════════════════════════════════════
+function getBoardSize(){return board.getBoundingClientRect();}
+
+function createSVG(){
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.id='connections';
+  svg.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+  board.appendChild(svg);return svg;
+}
+
+function showClueDesc(id){document.getElementById('dynamicText').innerHTML=CLUE_TEXTS[id]||'—';}
+function showArtifactDesc(i){document.getElementById('dynamicText').innerHTML=ARTIFACT_TEXTS[i][artifactState[i]]||'—';}
+
+function createUI(){
+  board.innerHTML='';
+  const{width:W,height:H}=getBoardSize();
+
+  const main=document.createElement('div');
+  main.className='node main';
+  main.style.left=(W/2-80)+'px';main.style.top=(H/2-80)+'px';
+  main.innerHTML=`<div style="padding:0 10px">Предал ли<br>Сигурд отца?</div>
+    <div id="mainState" style="margin-top:10px;font-size:11px;letter-spacing:0.12em;color:var(--yellow-dim)"></div>`;
+  board.appendChild(main);
+
+  const artRadius=W*0.22;
+  for(let i=0;i<numArtifacts;i++){
+    const ang=2*Math.PI*i/numArtifacts-Math.PI/2;
+    const x=W/2+Math.cos(ang)*artRadius-65;
+    const y=H/2+Math.sin(ang)*artRadius-65;
+    const a=document.createElement('div');
+    a.className='node artifact unknown';
+    a.id='artifact-'+i;
+    a.style.left=x+'px';a.style.top=y+'px';
+    a.innerHTML=`<div style="padding:0 8px">${ARTIFACT_TITLES[i]}</div>
+      <div id="art-${i}-state" style="font-size:9px;margin-top:6px;letter-spacing:0.1em"></div>`;
+    a.onclick=()=>onArtifactClick(i);
+    a.oncontextmenu=e=>{e.preventDefault();showArtifactDesc(i);};
+    board.appendChild(a);
+  }
+
+  const r=W*0.38;
+  CLUES.forEach((c,i)=>{
+    const ang=2*Math.PI*i/CLUES.length-Math.PI/2+Math.PI/6;
+    const x=W/2+Math.cos(ang)*r-43;
+    const y=H/2+Math.sin(ang)*r-43;
+    const el=document.createElement('div');
+    el.className='node clue '+(c.alignment==='naive'?'naive-clue':'cynic-clue');
+    el.id=c.id;el.style.left=x+'px';el.style.top=y+'px';
+    el.innerHTML=`<div style="padding:0 4px;font-size:9px">${c.title}</div>`;
+    el.onclick=()=>onClueClick(c.id);
+    el.oncontextmenu=e=>{e.preventDefault();showClueDesc(c.id);};
+    board.appendChild(el);
+  });
+
+  // Dashed link line between artifacts 0 and 1
+  const art0=document.getElementById('artifact-0'),art1=document.getElementById('artifact-1');
+  if(art0&&art1){
+    const svg=createSVG();
+    const br=board.getBoundingClientRect();
+    const r0=art0.getBoundingClientRect(),r1=art1.getBoundingClientRect();
+    const line=document.createElementNS("http://www.w3.org/2000/svg","line");
+    line.setAttribute("x1",r0.left-br.left+r0.width/2);line.setAttribute("y1",r0.top-br.top+r0.height/2);
+    line.setAttribute("x2",r1.left-br.left+r1.width/2);line.setAttribute("y2",r1.top-br.top+r1.height/2);
+    line.setAttribute("stroke","#3a2e22");line.setAttribute("stroke-width","2");
+    line.setAttribute("stroke-dasharray","7,4");line.id='link-line';
+    svg.appendChild(line);
+  }
+  refreshUI();
+}
+
+// ═══════════════════════════════════════════════════════════
+// GRAPH — CLICK LOGIC
+// ═══════════════════════════════════════════════════════════
+function onClueClick(id){
+  found[id]=!found[id];
+  autoUpdateArtifacts();
+  refreshUI();
+}
+
+function autoUpdateArtifacts(){
+  for(let i=0;i<numArtifacts;i++){
+    if(artifactLocked[i]) continue;
+    const hasN=CLUES.some(c=>c.artifact===i&&c.alignment==='naive'&&found[c.id]);
+    const hasC=CLUES.some(c=>c.artifact===i&&c.alignment==='cynic'&&found[c.id]);
+    const cur=artifactState[i];
+    if(!hasN&&!hasC){
+      if(cur!=='unknown'){
+        artifactState[i]='unknown';
+        if(LINKED_ARTIFACTS.includes(i)){
+          const li=LINKED_ARTIFACTS.find(x=>x!==i);
+          if(!artifactLocked[li]){
+            const lN=CLUES.some(c=>c.artifact===li&&c.alignment==='naive'&&found[c.id]);
+            const lC=CLUES.some(c=>c.artifact===li&&c.alignment==='cynic'&&found[c.id]);
+            if(!lN&&!lC) artifactState[li]='unknown';
+          }
+        }
+      }
+    } else if(cur==='naive'&&!hasN){
+      if(hasC){artifactState[i]='cynic'; applyLink(i,'cynic');}
+    } else if(cur==='cynic'&&!hasC){
+      if(hasN){artifactState[i]='naive'; applyLink(i,'naive');}
+    }
+  }
+}
+
+function applyLink(i,val){
+  if(!LINKED_ARTIFACTS.includes(i)) return;
+  const li=LINKED_ARTIFACTS.find(x=>x!==i);
+  if(!artifactLocked[li]) artifactState[li]=val;
+}
+
+function onArtifactClick(i){
+  if(artifactLocked[i]) return;
+  const hasN=CLUES.some(c=>c.artifact===i&&c.alignment==='naive'&&found[c.id]);
+  const hasC=CLUES.some(c=>c.artifact===i&&c.alignment==='cynic'&&found[c.id]);
+
+  if(!hasN&&!hasC) return; // no clues found yet
+
+  // Both clues found → launch maze
+  if(hasN&&hasC){
+    launchMaze(i);
+    return;
+  }
+
+  // Only one clue → fix immediately
+  const val=hasN?'naive':'cynic';
+  artifactState[i]=val;
+  artifactLocked[i]=true;
+  // Linked artifact gets same value (and is also locked)
+  if(LINKED_ARTIFACTS.includes(i)){
+    const li=LINKED_ARTIFACTS.find(x=>x!==i);
+    if(!artifactLocked[li]){
+      artifactState[li]=val;
+      // Don't lock the linked one — it can still be played via maze independently
+    }
+  }
+  refreshUI();
+}
+
+// ═══════════════════════════════════════════════════════════
+// GRAPH — REFRESH UI
+// ═══════════════════════════════════════════════════════════
+function areLinkedConflicted(){
+  const s0=artifactState[LINKED_ARTIFACTS[0]],s1=artifactState[LINKED_ARTIFACTS[1]];
+  if(s0==='unknown'||s1==='unknown') return false;
+  return s0!==s1;
+}
+
+function refreshUI(){
+  CLUES.forEach(c=>document.getElementById(c.id).classList.toggle('found',found[c.id]));
+
+  let svg=document.getElementById('connections');
+  if(!svg) svg=createSVG();
+  const linkLine=svg.querySelector('#link-line');
+  svg.innerHTML='';
+  if(linkLine) svg.appendChild(linkLine);
+
+  const br=board.getBoundingClientRect();
+  CLUES.forEach(c=>{
+    if(!found[c.id]) return;
+    const ce=document.getElementById(c.id).getBoundingClientRect();
+    const ae=document.getElementById('artifact-'+c.artifact).getBoundingClientRect();
+    const line=document.createElementNS("http://www.w3.org/2000/svg","line");
+    line.setAttribute("x1",ce.left-br.left+ce.width/2);line.setAttribute("y1",ce.top-br.top+ce.height/2);
+    line.setAttribute("x2",ae.left-br.left+ae.width/2);line.setAttribute("y2",ae.top-br.top+ae.height/2);
+    line.setAttribute("stroke",c.alignment==='naive'?'rgba(39,174,96,0.55)':'rgba(192,57,43,0.55)');
+    line.setAttribute("stroke-width","1.5");svg.appendChild(line);
+  });
+
+  let counts={naive:0,cynic:0,unknown:0};
+  const isConflicted=areLinkedConflicted();
+
+  for(let i=0;i<numArtifacts;i++){
+    const el=document.getElementById('artifact-'+i);
+    el.classList.remove('unknown','naive','cynic','conflicted','locked');
+    el.classList.add(artifactState[i]);
+    if(isConflicted&&LINKED_ARTIFACTS.includes(i)) el.classList.add('conflicted');
+    if(artifactLocked[i]) el.classList.add('locked');
+
+    const stEl=document.getElementById('art-'+i+'-state');
+    stEl.textContent=
+      artifactLocked[i]? (artifactState[i]==='naive'?'наивная ✦':'циничная ✦') :
+      artifactState[i]==='unknown'?'нераскрыта':
+      artifactState[i]==='naive'?'наивная':'циничная';
+    stEl.style.color=artifactState[i]==='naive'?'var(--naive-col)':artifactState[i]==='cynic'?'var(--cynic-col)':'var(--text)';
+    counts[artifactState[i]]++;
+
+    if(artifactState[i]!=='unknown'){
+      const ae=el.getBoundingClientRect();
+      const me=document.querySelector('.main').getBoundingClientRect();
+      const line=document.createElementNS("http://www.w3.org/2000/svg","line");
+      line.setAttribute("x1",ae.left-br.left+ae.width/2);line.setAttribute("y1",ae.top-br.top+ae.height/2);
+      line.setAttribute("x2",me.left-br.left+me.width/2);line.setAttribute("y2",me.top-br.top+me.height/2);
+      line.setAttribute("stroke",artifactState[i]==='naive'?'rgba(39,174,96,0.35)':'rgba(192,57,43,0.35)');
+      line.setAttribute("stroke-width","1.5");svg.appendChild(line);
+    }
+  }
+
+  let mainVerdict='—';
+  if(chapterFinished){
+    if(counts.naive>counts.cynic) mainVerdict='Наивная';
+    else if(counts.cynic>counts.naive) mainVerdict='Циничная';
+    else mainVerdict='Нейтральная';
+  }
+  document.getElementById('mainState').textContent=mainVerdict;
+
+  const vEl=document.getElementById('verdict');
+  vEl.className='verdict-text';
+  if(chapterFinished){
+    vEl.textContent=mainVerdict+(isConflicted?' — противоречие':'');
+    if(counts.naive>counts.cynic) vEl.classList.add('naive');
+    else if(counts.cynic>counts.naive) vEl.classList.add('cynic');
+    if(isConflicted) vEl.innerHTML+='<span class="conflict-badge">Конфликт</span>';
+  } else { vEl.textContent='Глава не завершена'; }
+
+  document.getElementById('verDetails').innerHTML=
+    `<span style="color:var(--naive-col)">Наивных: ${counts.naive}</span> &nbsp;`+
+    `<span style="color:var(--cynic-col)">Циничных: ${counts.cynic}</span> &nbsp;`+
+    `<span>Нераскрытых: ${counts.unknown}</span>`+
+    (isConflicted?`<div class="warning">⚠ Улики 1 и 2 противоречат</div>`:'');
+
+  const foundList=document.getElementById('foundList');
+  const items=CLUES.filter(c=>found[c.id]);
+  foundList.innerHTML=items.length
+    ?items.map(f=>`<div style="margin-bottom:3px;color:${f.alignment==='naive'?'var(--naive-col)':'var(--cynic-col)'}">· ${f.title}</div>`).join('')
+    :'—';
+
+  const artList=document.getElementById('artList');artList.innerHTML='';
+  for(let i=0;i<numArtifacts;i++){
+    const hasN=CLUES.some(c=>c.artifact===i&&c.alignment==='naive'&&found[c.id]);
+    const hasC=CLUES.some(c=>c.artifact===i&&c.alignment==='cynic'&&found[c.id]);
+    const row=document.createElement('div');row.className='art-row';
+    const linked=LINKED_ARTIFACTS.includes(i);
+    const sc=artifactState[i]==='naive'?'var(--naive-col)':artifactState[i]==='cynic'?'var(--cynic-col)':'var(--text)';
+    const lockMark=artifactLocked[i]?' ✦':'';
+    row.innerHTML=`<div class="small">
+      <strong style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;color:${sc}">
+        ${linked?'↔ ':''}Улика ${i+1}${lockMark}</strong>
+      <div style="font-size:10px;margin-top:2px">${ARTIFACT_TITLES[i]}</div>
+      <div style="font-size:9px;color:#3a3028;margin-top:1px">${hasN&&hasC?'обе подсказки — нажмите для лабиринта':hasN?'наивная подсказка':hasC?'циничная подсказка':'нет подсказок'}</div>
+    </div>`;
+    artList.appendChild(row);
+  }
+}
+
+document.getElementById('resetBtn').onclick=()=>{
+  CLUES.forEach(c=>found[c.id]=false);
+  for(let i=0;i<numArtifacts;i++){artifactState[i]='unknown';artifactLocked[i]=false;}
+  chapterFinished=false;
+  document.getElementById('dynamicText').innerHTML='—';
+  refreshUI();
+};
+document.getElementById('randomBtn').onclick=()=>{
+  CLUES.forEach(c=>found[c.id]=false);
+  const n=Math.floor(Math.random()*CLUES.length)+1;
+  CLUES.slice().sort(()=>Math.random()-0.5).slice(0,n).forEach(c=>found[c.id]=true);
+  for(let i=0;i<numArtifacts;i++){artifactState[i]='unknown';artifactLocked[i]=false;}
+  chapterFinished=false;
+  autoUpdateArtifacts();refreshUI();
+};
+document.getElementById('finishBtn').onclick=()=>{
+  const qa=document.getElementById('qNaive').checked?'naive':'cynic';
+  for(let i=0;i<numArtifacts;i++){
+    if(!CLUES.some(c=>c.artifact===i&&found[c.id])&&artifactState[i]==='unknown') artifactState[i]=qa;
+  }
+  chapterFinished=true;refreshUI();
+};
+window.addEventListener('resize',createUI);
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — CONSTANTS
+// ═══════════════════════════════════════════════════════════
+const Nd=0,Sd=1,Wd=2,Ed=3;
+const ROWS=9,COLS=9,CELL_SIZE=58;
+const EXIT_R=4,EXIT_L_C=0,EXIT_R_C=8;
+const START_R=4,START_C=4;
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — INTEGRATION STATE
+// currentArtifact: which artifact index the running maze is for
+// ═══════════════════════════════════════════════════════════
+let currentArtifact=-1;
+
+function launchMaze(artifactIdx){
+  currentArtifact=artifactIdx;
+  const screenMaze=document.getElementById('screen-maze');
+  screenMaze.classList.add('active');
+  document.getElementById('maze-artifact-label').textContent=
+    '« '+ARTIFACT_TITLES[artifactIdx]+' »';
+  startGame();
+}
+
+function returnToGraph(result){
+  // result: 'naive' | 'cynic' | 'death' (on death, re-run maze for same artifact)
+  if(result==='death'){
+    // Just re-enter maze for same artifact after a moment
+    setTimeout(()=>startGame(),400);
+    return;
+  }
+  // Fix artifact interpretation
+  const i=currentArtifact;
+  artifactState[i]=result;
+  artifactLocked[i]=true;
+
+  // Linked artifact: same value, last maze wins, lock it too
+  if(LINKED_ARTIFACTS.includes(i)){
+    const li=LINKED_ARTIFACTS.find(x=>x!==i);
+    artifactState[li]=result;
+    // Don't lock the linked one if it hasn't been played yet — it can still launch maze
+    // But if it was already locked, keep its own result
+  }
+
+  // Hide maze screen and return to graph
+  const screenMaze=document.getElementById('screen-maze');
+  screenMaze.classList.remove('active');
+  currentArtifact=-1;
+  refreshUI();
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — GENERATION
+// ═══════════════════════════════════════════════════════════
+function generateMaze(){
+  const m=[];
+  for(let r=0;r<ROWS;r++){m[r]=[];for(let c=0;c<COLS;c++)m[r][c]=[0,0,0,0];}
+  const vis=Array.from({length:ROWS},()=>new Array(COLS).fill(false));
+  const sh=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  const stack=[[START_R,START_C]];vis[START_R][START_C]=true;
+  while(stack.length){
+    const[r,c]=stack[stack.length-1];
+    const dirs=sh([[Nd,-1,0],[Sd,1,0],[Wd,0,-1],[Ed,0,1]]);
+    let moved=false;
+    for(const[dir,dr,dc] of dirs){
+      const nr=r+dr,nc=c+dc;
+      if(nr<0||nr>=ROWS||nc<0||nc>=COLS||vis[nr][nc])continue;
+      m[r][c][dir]=1;m[nr][nc][[Sd,Nd,Ed,Wd][dir]]=1;
+      vis[nr][nc]=true;stack.push([nr,nc]);moved=true;break;
+    }
+    if(!moved)stack.pop();
+  }
+  m[EXIT_R][EXIT_L_C][Wd]=1;m[EXIT_R][EXIT_R_C][Ed]=1;
+  return m;
+}
+
+let MAZE=generateMaze();
+
+function findDeadEnds(maze){
+  const forbidden=new Set([`${START_R},${START_C}`,`${EXIT_R},${EXIT_L_C}`,`${EXIT_R},${EXIT_R_C}`]);
+  const dead=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(forbidden.has(`${r},${c}`))continue;
+    const open=maze[r][c][Nd]+maze[r][c][Sd]+maze[r][c][Wd]+maze[r][c][Ed];
+    if(open===1)dead.push([r,c]);
+  }
+  return dead;
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+let SC_POSITIONS=[],scLit={};
+function initCandles(){
+  const dead=shuffle(findDeadEnds(MAZE));
+  SC_POSITIONS=dead.slice(0,Math.min(3,dead.length));
+  scLit={};SC_POSITIONS.forEach(([r,c])=>{scLit[`${r},${c}`]=false;});
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — STATE
+// ═══════════════════════════════════════════════════════════
+let pR=START_R,pC=START_C,steps=0,gameActive=false,candleLit=true;
+let mR=-1,mC=-1,mMode='idle',mChase=0,runeAvailable=true;
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — DOM REFS
+// ═══════════════════════════════════════════════════════════
+const gridEl=document.getElementById('grid');
+const playerTok=document.getElementById('player-token');
+const monsterTok=document.getElementById('monster-token');
+const stepsEl=document.getElementById('steps-counter');
+const candleSt=document.getElementById('candle-status');
+const statusBar=document.getElementById('status-bar');
+const overlay=document.getElementById('overlay');
+const overlayTitle=document.getElementById('overlay-title');
+const overlaySub=document.getElementById('overlay-sub');
+const overlayBtns=document.getElementById('overlay-btns');
+const runeBtnEl=document.getElementById('rune-btn');
+const cellEls=[];
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — GRID
+// ═══════════════════════════════════════════════════════════
+function buildGrid(){
+  gridEl.innerHTML='';cellEls.length=0;
+  for(let r=0;r<ROWS;r++){
+    cellEls[r]=[];
+    for(let c=0;c<COLS;c++){
+      const cell=document.createElement('div');cell.className='cell dark';
+      const corr=document.createElement('div');corr.className='corridor';
+      const[cn,cs,cw,ce]=MAZE[r][c];
+      if(!cn)corr.classList.add('wall-n');if(!cs)corr.classList.add('wall-s');
+      if(!cw)corr.classList.add('wall-w');if(!ce)corr.classList.add('wall-e');
+      cell.appendChild(corr);
+      if(r===EXIT_R&&c===EXIT_L_C){const x=document.createElement('div');x.className='exit-candle red';cell.appendChild(x);}
+      if(r===EXIT_R&&c===EXIT_R_C){const x=document.createElement('div');x.className='exit-candle green';cell.appendChild(x);}
+      if(scLit.hasOwnProperty(`${r},${c}`)){
+        const sc=document.createElement('div');sc.className='static-candle unlit';sc.id=`sc-${r}-${c}`;cell.appendChild(sc);
+      }
+      gridEl.appendChild(cell);cellEls[r][c]=cell;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — LIGHTING
+// ═══════════════════════════════════════════════════════════
+function getLitSet(){
+  const lit=new Set([`${pR},${pC}`]);
+  if(candleLit){
+    [[Nd,-1,0],[Sd,1,0],[Wd,0,-1],[Ed,0,1]].forEach(([dir,dr,dc])=>{
+      if(!MAZE[pR][pC][dir])return;
+      const nr=pR+dr,nc=pC+dc;
+      if(nr<0||nr>=ROWS||nc<0||nc>=COLS)return;
+      if(!MAZE[nr][nc][[Sd,Nd,Ed,Wd][dir]])return;
+      lit.add(`${nr},${nc}`);
+    });
+  }
+  SC_POSITIONS.forEach(([r,c])=>{if(scLit[`${r},${c}`])lit.add(`${r},${c}`);});
+  return lit;
+}
+
+function updateLighting(){
+  const lit=getLitSet();
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const el=cellEls[r][c];const key=`${r},${c}`;
+    el.classList.remove('lit','player-cell','exit-left','exit-right','static-lit');
+    if(lit.has(key)){
+      el.classList.remove('dark');el.classList.add('lit');
+      if(r===pR&&c===pC)el.classList.add('player-cell');
+      if(r===EXIT_R&&c===EXIT_L_C)el.classList.add('exit-left');
+      if(r===EXIT_R&&c===EXIT_R_C)el.classList.add('exit-right');
+      if(scLit[key])el.classList.add('static-lit');
+    }else{el.classList.add('dark');}
+  }
+  SC_POSITIONS.forEach(([r,c])=>{
+    const sc=document.getElementById(`sc-${r}-${c}`);
+    if(sc)sc.className='static-candle '+(scLit[`${r},${c}`]?'lit-yellow':'unlit');
+  });
+  playerTok.classList.toggle('candle-out',!candleLit);
+  candleSt.textContent=candleLit?'свеча горит':'свеча погашена';
+  candleSt.className=candleLit?'':'out';
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — LOS
+// ═══════════════════════════════════════════════════════════
+function los(r1,c1,r2,c2){
+  if(r1===r2&&c1===c2)return true;
+  if(r1!==r2&&c1!==c2)return false;
+  if(r1===r2){
+    const mn=Math.min(c1,c2),mx=Math.max(c1,c2);
+    for(let c=mn;c<mx;c++)if(!MAZE[r1][c][Ed]||!MAZE[r1][c+1][Wd])return false;
+    return true;
+  }else{
+    const mn=Math.min(r1,r2),mx=Math.max(r1,r2);
+    for(let r=mn;r<mx;r++)if(!MAZE[r][c1][Sd]||!MAZE[r+1][c1][Nd])return false;
+    return true;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — MONSTER
+// ═══════════════════════════════════════════════════════════
+function renderMonster(){
+  if(mR<0){monsterTok.style.display='none';monsterTok.classList.remove('force-visible','chasing');return;}
+  const vis=getLitSet().has(`${mR},${mC}`);
+  const forceShow=mMode==='chasing'||mMode==='spotted';
+  if(vis||forceShow){
+    monsterTok.style.display='block';
+    monsterTok.style.left=(mC*CELL_SIZE+CELL_SIZE/2)+'px';
+    monsterTok.style.top=(mR*CELL_SIZE+CELL_SIZE/2)+'px';
+    monsterTok.classList.toggle('chasing',mMode==='chasing');
+    monsterTok.classList.toggle('force-visible',forceShow&&!vis);
+  }else{
+    monsterTok.style.display='none';monsterTok.classList.remove('force-visible');
+  }
+}
+
+function bfsStep(fr,fc,tr,tc){
+  if(fr===tr&&fc===tc)return null;
+  const vis=new Set([`${fr},${fc}`]);
+  const q=[{r:fr,c:fc,first:null}];
+  while(q.length){
+    const{r,c,first}=q.shift();
+    for(const[dir,dr,dc]of[[Nd,-1,0],[Sd,1,0],[Wd,0,-1],[Ed,0,1]]){
+      if(!MAZE[r][c][dir])continue;
+      const nr=r+dr,nc=c+dc;
+      if(nr<0||nr>=ROWS||nc<0||nc>=COLS)continue;
+      if(!MAZE[nr][nc][[Sd,Nd,Ed,Wd][dir]])continue;
+      const key=`${nr},${nc}`;if(vis.has(key))continue;
+      vis.add(key);const step=first||{r:nr,c:nc};
+      if(nr===tr&&nc===tc)return step;
+      q.push({r:nr,c:nc,first:step});
+    }
+  }return null;
+}
+
+function moveMonsterToward(tr,tc){const s=bfsStep(mR,mC,tr,tc);if(s){mR=s.r;mC=s.c;}}
+
+function spawnMonster(){
+  const forbidden=new Set([`${pR},${pC}`,`${EXIT_R},${EXIT_L_C}`,`${EXIT_R},${EXIT_R_C}`]);
+  SC_POSITIONS.forEach(([r,c])=>forbidden.add(`${r},${c}`));
+  const cands=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(!forbidden.has(`${r},${c}`)&&!los(r,c,pR,pC))cands.push([r,c]);
+  }
+  const pool=cands.length?cands:[[0,0]];
+  const[r,c]=pool[Math.floor(Math.random()*pool.length)];
+  mR=r;mC=c;mMode='idle';mChase=0;
+}
+
+function monsterTurn(){
+  if(mR<0)return;
+  const monVisible=getLitSet().has(`${mR},${mC}`);
+  const monHasLOS=los(mR,mC,pR,pC);
+
+  if(mMode==='idle'){
+    if(monVisible) mMode='spotted';
+    return;
+  }
+  if(mMode==='spotted'){
+    mMode='chasing';mChase=4;
+    if(monHasLOS&&candleLit) candleLit=false;
+    moveMonsterToward(pR,pC);mChase--;
+    if(mChase<=0){
+      mR=-1;mC=-1;mMode='idle';
+      setTimeout(()=>{if(!gameActive)return;spawnMonster();renderMonster();updateRuneBtn();},700);
+    }
+    return;
+  }
+  if(mMode==='chasing'){
+    if(los(mR,mC,pR,pC)&&candleLit) candleLit=false;
+    moveMonsterToward(pR,pC);mChase--;
+    if(mChase<=0){
+      mR=-1;mC=-1;mMode='idle';
+      setTimeout(()=>{if(!gameActive)return;spawnMonster();renderMonster();updateRuneBtn();},700);
+    }
+  }
+}
+
+function updateStatus(){
+  if(!gameActive){statusBar.textContent='';statusBar.className='';return;}
+  const monVisible=mR>=0&&getLitSet().has(`${mR},${mC}`);
+  if(mMode==='spotted'&&monVisible){statusBar.textContent='ПРИЗРАК ПРОШЛОГО НАШЕЛ ТЕБЯ';statusBar.className='danger';}
+  else if(mMode==='chasing'){statusBar.textContent='ПРЕСЛЕДОВАНИЕ  '+mChase;statusBar.className='chase';}
+  else if(!candleLit){statusBar.textContent='свеча погашена — найди огонь в тупике';statusBar.className='';}
+  else{statusBar.textContent='';statusBar.className='';}
+}
+
+function updatePlayerToken(){
+  playerTok.style.left=(pC*CELL_SIZE+CELL_SIZE/2)+'px';
+  playerTok.style.top=(pR*CELL_SIZE+CELL_SIZE/2)+'px';
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — RUNE
+// ═══════════════════════════════════════════════════════════
+function updateRuneBtn(){
+  if(!runeAvailable){runeBtnEl.disabled=true;runeBtnEl.textContent='⟁ Руна использована';return;}
+  const monInFov=mR>=0&&getLitSet().has(`${mR},${mC}`);
+  const monForced=mR>=0&&(mMode==='chasing'||mMode==='spotted');
+  runeBtnEl.disabled=!(monInFov||monForced)||!gameActive;
+}
+
+function activateRune(){
+  if(!runeAvailable||!gameActive)return;
+  if(mR<0)return;
+  const monInFov=getLitSet().has(`${mR},${mC}`);
+  const monForced=mMode==='chasing'||mMode==='spotted';
+  if(!monInFov&&!monForced)return;
+  runeAvailable=false;
+  mR=-1;mC=-1;mMode='idle';mChase=0;
+  monsterTok.classList.remove('force-visible','chasing');monsterTok.style.display='none';
+  setTimeout(()=>{if(!gameActive)return;spawnMonster();renderMonster();},800);
+  updateLighting();updateRuneBtn();updateStatus();
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — MOVE
+// ═══════════════════════════════════════════════════════════
+const DIR_MAP={'w':[Nd,-1,0],'s':[Sd,1,0],'a':[Wd,0,-1],'d':[Ed,0,1]};
+const BUMP={'w':'translate(0,-5px)','s':'translate(0,5px)','a':'translate(-5px,0)','d':'translate(5px,0)'};
+
+function tryMove(key){
+  if(!gameActive)return;
+  const k=key.toLowerCase();if(!DIR_MAP[k])return;
+  const[dir,dr,dc]=DIR_MAP[k];
+  const nr=pR+dr,nc=pC+dc;
+
+  // Boundary exit — cynic (left/red) or naive (right/green)
+  if(nr<0||nr>=ROWS||nc<0||nc>=COLS){
+    if(pR===EXIT_R&&pC===EXIT_L_C&&k==='a'){triggerWin('left');return;}
+    if(pR===EXIT_R&&pC===EXIT_R_C&&k==='d'){triggerWin('right');return;}
+    bumpP(k);return;
+  }
+
+  if(!MAZE[pR][pC][dir]){bumpP(k);return;}
+  if(!MAZE[nr][nc][[Sd,Nd,Ed,Wd][dir]]){bumpP(k);return;}
+  if(candleLit&&!getLitSet().has(`${nr},${nc}`)){bumpP(k);return;}
+
+  pR=nr;pC=nc;steps++;stepsEl.textContent='Шагов: '+steps;
+
+  const scKey=`${pR},${pC}`;
+  if(scLit.hasOwnProperty(scKey)){
+    if(!scLit[scKey]&&candleLit)scLit[scKey]=true;
+    if(scLit[scKey]&&!candleLit)candleLit=true;
+  }
+
+  monsterTurn();
+  updateLighting();updatePlayerToken();renderMonster();updateStatus();updateRuneBtn();
+
+  if(mR>=0&&pR===mR&&pC===mC){triggerDeath();return;}
+}
+
+function bumpP(k){
+  playerTok.style.setProperty('--bd',BUMP[k]||'translate(0,0)');
+  playerTok.classList.remove('bump');void playerTok.offsetWidth;playerTok.classList.add('bump');
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — WIN / DEATH
+// ═══════════════════════════════════════════════════════════
+function triggerWin(side){
+  gameActive=false;
+  // left exit = red = cynic; right exit = green = naive
+  const result=side==='left'?'cynic':'naive';
+  const L=side==='left';
+  overlay.className='active '+(L?'win-left':'win-right');
+  overlayTitle.textContent=L?'Красный Свет — Циничная':'Зелёный Свет — Наивная';
+  overlayBtns.innerHTML='';
+  const btn=document.createElement('button');
+  btn.className='overlay-btn';
+  btn.textContent='Вернуться к уликам';
+  btn.onclick=()=>{
+    overlay.className='';overlay.classList.remove('active');
+    returnToGraph(result);
+  };
+  overlayBtns.appendChild(btn);
+}
+
+function triggerDeath(){
+  gameActive=false;
+  overlay.className='active death';
+  overlayTitle.textContent='Темнота';
+  overlaySub.textContent='Ты встретил его в темноте. Шагов пройдено: '+steps;
+  overlayBtns.innerHTML='';
+  const btn=document.createElement('button');
+  btn.className='overlay-btn';btn.textContent='Войти снова';
+  btn.onclick=()=>{
+    overlay.className='';overlay.classList.remove('active');
+    returnToGraph('death');
+  };
+  overlayBtns.appendChild(btn);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAZE — START
+// ═══════════════════════════════════════════════════════════
+function startGame(){
+  MAZE=generateMaze();initCandles();
+  pR=START_R;pC=START_C;steps=0;candleLit=true;
+  mR=-1;mC=-1;mMode='idle';mChase=0;runeAvailable=true;
+  stepsEl.textContent='Шагов: 0';
+  buildGrid();updateLighting();updatePlayerToken();
+  monsterTok.style.display='none';monsterTok.classList.remove('force-visible','chasing');
+  statusBar.textContent='';statusBar.className='';
+  updateRuneBtn();
+  // Entry overlay
+  overlay.className='active start';
+  overlayTitle.textContent='The Labyrinth';
+  overlaySub.textContent='Найди выход из лабиринта закоулков своих воспоминаний.';
+  overlayBtns.innerHTML='';
+  const btn=document.createElement('button');btn.className='overlay-btn';btn.textContent='Войти';
+  btn.onclick=()=>{
+    overlay.className='';overlay.classList.remove('active');
+    gameActive=true;
+    setTimeout(()=>{if(!gameActive)return;spawnMonster();renderMonster();},900);
+  };
+  overlayBtns.appendChild(btn);
+}
+
+// ═══════════════════════════════════════════════════════════
+// INPUT — only active when maze screen is visible
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('screen-maze').classList.contains('active'))return;
+  switch(e.code){
+    case 'KeyW':case 'ArrowUp':    e.preventDefault();tryMove('w');break;
+    case 'KeyS':case 'ArrowDown':  e.preventDefault();tryMove('s');break;
+    case 'KeyA':case 'ArrowLeft':  e.preventDefault();tryMove('a');break;
+    case 'KeyD':case 'ArrowRight': e.preventDefault();tryMove('d');break;
+    case 'KeyR': e.preventDefault();activateRune();break;
+  }
+});
+let tx=0,ty=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchend',e=>{
+  if(!document.getElementById('screen-maze').classList.contains('active'))return;
+  const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)<12&&Math.abs(dy)<12)return;
+  tryMove(Math.abs(dx)>Math.abs(dy)?(dx>0?'d':'a'):(dy>0?'s':'w'));
+},{passive:true});
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+createUI();
+</script>
+</body>
+</html>
