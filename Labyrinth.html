@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE LABYRINTH</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap');
+
+:root {
+  --black:#050505; --yellow:#f5c842; --yellow-dim:#c8962a;
+  --red:#c0392b; --red-glow:rgba(192,57,43,0.4);
+  --green:#27ae60; --green-glow:rgba(39,174,96,0.4);
+  --wall-edge:#2e1e1e; --fog:#050505;
+  --text:#8a7060; --text-bright:#c4a882; --cs:58px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;background:var(--black);display:flex;align-items:center;justify-content:center;font-family:'IM Fell English',serif;overflow:hidden;user-select:none;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 4px);pointer-events:none;z-index:100;}
+#wrapper{display:flex;flex-direction:column;align-items:center;gap:16px;}
+#title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.55em;color:var(--text);text-transform:uppercase;opacity:0.5;}
+#hud{display:flex;justify-content:space-between;align-items:center;width:calc(var(--cs)*9);}
+.hud-candle{display:flex;align-items:center;gap:7px;font-size:11px;letter-spacing:0.1em;}
+.candle-dot{width:7px;height:7px;border-radius:50%;}
+.candle-dot.red{background:var(--red);box-shadow:0 0 5px var(--red);}
+.candle-dot.green{background:var(--green);box-shadow:0 0 5px var(--green);}
+.hud-candle.red{color:#9a3838;}.hud-candle.green{color:#387058;}
+#steps-counter{font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.3em;color:var(--text);opacity:0.45;}
+#candle-status{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.18em;color:var(--yellow-dim);opacity:0.7;min-width:110px;text-align:center;}
+#candle-status.out{color:#553322;}
+#game-container{position:relative;width:calc(var(--cs)*9);height:calc(var(--cs)*9);}
+#grid{display:grid;grid-template-columns:repeat(9,var(--cs));grid-template-rows:repeat(9,var(--cs));width:100%;height:100%;}
+.cell{position:relative;width:var(--cs);height:var(--cs);background:var(--black);transition:background 0.28s ease,box-shadow 0.28s ease;}
+.corridor{position:absolute;inset:0;background:var(--black);transition:background 0.28s ease,border-color 0.12s ease;}
+.wall-n{border-top:3px solid var(--wall-edge);}
+.wall-s{border-bottom:3px solid var(--wall-edge);}
+.wall-w{border-left:3px solid var(--wall-edge);}
+.wall-e{border-right:3px solid var(--wall-edge);}
+.cell.dark{background:var(--fog) !important;box-shadow:none !important;}
+.cell.dark .corridor{background:var(--fog);border-color:var(--fog) !important;}
+.cell.dark .exit-candle,.cell.dark .static-candle{display:block;}
+.cell.lit{background:#0c0a07;}.cell.lit .corridor{background:#0c0a07;}
+.cell.player-cell{background:#131008 !important;box-shadow:inset 0 0 28px rgba(245,200,66,0.13) !important;}
+.cell.exit-left{box-shadow:inset 0 0 22px var(--red-glow),0 0 16px var(--red-glow) !important;}
+.cell.exit-right{box-shadow:inset 0 0 22px var(--green-glow),0 0 16px var(--green-glow) !important;}
+.cell.static-lit{box-shadow:inset 0 0 16px rgba(245,200,66,0.09) !important;}
+.static-candle{position:absolute;width:8px;height:8px;border-radius:50%;transform:translate(-50%,-50%);top:50%;left:50%;pointer-events:none;z-index:7;}
+.static-candle.unlit{background:#251a0d;box-shadow:0 0 2px 1px rgba(40,20,5,0.5);}
+.static-candle.lit-yellow{background:radial-gradient(circle,#ffe090,var(--yellow));box-shadow:0 0 5px 2px rgba(245,200,66,0.75),0 0 14px 5px rgba(245,200,66,0.28);animation:flicker-y 2.2s ease-in-out infinite;}
+.exit-candle{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);top:50%;left:50%;pointer-events:none;z-index:8;}
+.exit-candle.red{background:radial-gradient(circle,#ff6b5b,var(--red));box-shadow:0 0 5px 2px rgba(192,57,43,0.9),0 0 16px 6px rgba(192,57,43,0.3);animation:flicker-r 2.5s ease-in-out infinite;}
+.exit-candle.green{background:radial-gradient(circle,#5bf58a,var(--green));box-shadow:0 0 5px 2px rgba(39,174,96,0.9),0 0 16px 6px rgba(39,174,96,0.3);animation:flicker-g 2.8s ease-in-out infinite;}
+#player-token{position:absolute;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ffe8a0,var(--yellow) 50%,var(--yellow-dim) 100%);box-shadow:0 0 7px 3px rgba(245,200,66,0.65),0 0 18px 6px rgba(245,200,66,0.25),0 0 44px 13px rgba(245,200,66,0.08);transform:translate(-50%,-50%);transition:left 0.15s ease,top 0.15s ease;pointer-events:none;z-index:10;animation:flicker-y 3s ease-in-out infinite;}
+#player-token::after{content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:4px;height:9px;background:linear-gradient(to top,var(--yellow),rgba(255,200,50,0.2),transparent);border-radius:50% 50% 30% 30%;animation:flame 0.75s ease-in-out infinite alternate;}
+#player-token.candle-out{background:#181008;box-shadow:0 0 3px 1px rgba(40,20,5,0.3);animation:none;}
+#player-token.candle-out::after{display:none;}
+#monster-token{position:absolute;width:24px;height:24px;transform:translate(-50%,-50%);transition:left 0.2s ease,top 0.2s ease;pointer-events:none;z-index:9;display:none;}
+#monster-token svg{width:100%;height:100%;}
+#monster-token.chasing{animation:mpulse 0.55s ease-in-out infinite alternate;}
+@keyframes mpulse{from{filter:drop-shadow(0 0 3px rgba(180,30,30,0.6));}to{filter:drop-shadow(0 0 9px rgba(220,50,50,1));}}
+@keyframes flicker-y{0%,100%{box-shadow:0 0 7px 3px rgba(245,200,66,0.65),0 0 18px 6px rgba(245,200,66,0.25),0 0 44px 13px rgba(245,200,66,0.08);}35%{box-shadow:0 0 5px 2px rgba(245,200,66,0.5),0 0 13px 4px rgba(245,200,66,0.18),0 0 34px 10px rgba(245,200,66,0.05);}65%{box-shadow:0 0 9px 4px rgba(245,200,66,0.75),0 0 22px 8px rgba(245,200,66,0.3),0 0 54px 16px rgba(245,200,66,0.1);}}
+@keyframes flame{from{height:7px;opacity:0.9;}to{height:12px;opacity:0.5;transform:translateX(-47%) skewX(6deg);}}
+@keyframes flicker-r{0%,100%{opacity:1;}40%{opacity:0.7;}70%{opacity:0.88;}}
+@keyframes flicker-g{0%,100%{opacity:1;}30%{opacity:0.76;}65%{opacity:0.92;}}
+#status-bar{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.22em;color:var(--text);opacity:0.4;text-align:center;height:14px;}
+#status-bar.danger{color:#c03030;opacity:1;animation:dblink 0.75s ease-in-out infinite alternate;}
+#status-bar.chase{color:#d05010;opacity:0.95;}
+@keyframes dblink{from{opacity:0.55;}to{opacity:1;}}
+#controls-hint{font-size:10px;letter-spacing:0.18em;color:var(--text);opacity:0.28;text-align:center;font-family:'Cinzel',serif;}
+#rune-btn{background:none;border:1px solid rgba(140,80,200,0.55);color:#c090f0;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;padding:7px 18px;cursor:pointer;transition:border-color 0.2s,color 0.2s,box-shadow 0.2s;margin-top:4px;text-shadow:0 0 10px rgba(180,100,255,0.4);}
+#rune-btn:not(:disabled):hover{border-color:#d090ff;color:#e0b0ff;box-shadow:0 0 20px rgba(180,80,255,0.35);text-shadow:0 0 14px rgba(200,120,255,0.7);}
+#rune-btn:disabled{opacity:0.18;cursor:default;border-color:rgba(60,40,80,0.18);color:#3a2a4a;text-shadow:none;}
+#overlay{position:fixed;inset:0;background:rgba(5,5,5,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;z-index:200;opacity:0;pointer-events:none;transition:opacity 0.55s ease;}
+#overlay.active{opacity:1;pointer-events:all;}
+#overlay-title{font-family:'Cinzel',serif;font-size:26px;letter-spacing:0.3em;text-transform:uppercase;color:var(--text-bright);}
+#overlay-sub{font-family:'IM Fell English',serif;font-size:13px;letter-spacing:0.14em;opacity:0.45;color:var(--text-bright);}
+.overlay-btn{background:none;border:1px solid rgba(140,100,60,0.28);color:var(--text-bright);font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.4em;text-transform:uppercase;padding:11px 30px;cursor:pointer;transition:border-color 0.2s,color 0.2s,box-shadow 0.2s;}
+.overlay-btn:hover{border-color:var(--yellow-dim);color:var(--yellow);box-shadow:0 0 18px rgba(245,200,66,0.1);}
+#overlay.win-left #overlay-title{color:var(--red);text-shadow:0 0 28px var(--red-glow);}
+#overlay.win-right #overlay-title{color:var(--green);text-shadow:0 0 28px var(--green-glow);}
+#overlay.start #overlay-title{color:var(--yellow-dim);text-shadow:0 0 26px rgba(245,200,66,0.2);}
+#overlay.death #overlay-title{color:#6a1010;text-shadow:0 0 30px rgba(80,10,10,0.9);}
+#overlay.death #overlay-sub{color:#5a2020;}
+#overlay.exit-prompt #overlay-title{color:var(--text-bright);}
+.overlay-btn-row{display:flex;gap:16px;}
+@keyframes bump{0%{transform:translate(0,0) translate(-50%,-50%);}30%{transform:var(--bd) translate(-50%,-50%);}100%{transform:translate(0,0) translate(-50%,-50%);}}
+.bump{animation:bump 0.14s ease;}
+#monster-token.force-visible{display:block !important;}
+</style>
+</head>
+<body>
+<div id="wrapper">
+  <div id="title">The Labyrinth</div>
+  <div id="hud">
+    <div class="hud-candle red"><div class="candle-dot red"></div>Выход левый</div>
+    <div id="candle-status">свеча горит</div>
+    <div id="steps-counter">Шагов: 0</div>
+    <div class="hud-candle green"><div class="candle-dot green"></div>Выход правый</div>
+  </div>
+  <div id="game-container">
+    <div id="grid"></div>
+    <div id="player-token"></div>
+    <div id="monster-token">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="12" cy="14" rx="7.5" ry="8.5" fill="#140606"/>
+        <ellipse cx="12" cy="14" rx="7.5" ry="8.5" fill="none" stroke="#7a1212" stroke-width="1.2"/>
+        <ellipse cx="9" cy="12" rx="2" ry="2.4" fill="#bb1e1e" opacity="0.92"/>
+        <ellipse cx="15" cy="12" rx="2" ry="2.4" fill="#bb1e1e" opacity="0.92"/>
+        <ellipse cx="9" cy="12.3" rx="0.8" ry="1" fill="#ff3333"/>
+        <ellipse cx="15" cy="12.3" rx="0.8" ry="1" fill="#ff3333"/>
+        <path d="M8.5 17.5 Q12 15.5 15.5 17.5" stroke="#7a1212" stroke-width="0.9" fill="none"/>
+        <path d="M4.5 5 Q6.5 2 8.5 5 Q10 2.5 12 5 Q14 2.5 15.5 5 Q17.5 2 19.5 5" stroke="#4a0808" stroke-width="1.1" fill="none"/>
+      </svg>
+    </div>
+  </div>
+  <div id="status-bar"></div>
+  <div id="controls-hint">W A S D — движение</div>
+  <button id="rune-btn" disabled onclick="activateRune()">⟁ Руна отпугивания &nbsp;[R]</button>
+</div>
+<div id="overlay" class="start active">
+  <div id="overlay-title">The Labyrinth</div>
+  <div id="overlay-sub">Найди выход из лабиринта закоулков своих воспоминаний.</div>
+  <div id="overlay-btns" class="overlay-btn-row">
+    <button class="overlay-btn" id="overlay-btn" onclick="startGame()">Войти</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════════════════════
+const Nd=0,Sd=1,Wd=2,Ed=3;
+const ROWS=9,COLS=9,CELL_SIZE=58;
+const EXIT_R=4,EXIT_L_C=0,EXIT_R_C=8;
+const START_R=4,START_C=4;
+
+// ══════════════════════════════════════════════════════════
+// MAZE GENERATION — recursive backtracker
+// Guarantees full connectivity. Exits forced open after.
+// ══════════════════════════════════════════════════════════
+function generateMaze() {
+  const m=[];
+  for(let r=0;r<ROWS;r++){m[r]=[];for(let c=0;c<COLS;c++)m[r][c]=[0,0,0,0];}
+  const vis=Array.from({length:ROWS},()=>new Array(COLS).fill(false));
+  const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  const stack=[[START_R,START_C]];
+  vis[START_R][START_C]=true;
+  while(stack.length){
+    const[r,c]=stack[stack.length-1];
+    const dirs=shuffle([[Nd,-1,0],[Sd,1,0],[Wd,0,-1],[Ed,0,1]]);
+    let moved=false;
+    for(const[dir,dr,dc] of dirs){
+      const nr=r+dr,nc=c+dc;
+      if(nr<0||nr>=ROWS||nc<0||nc>=COLS||vis[nr][nc])continue;
+      m[r][c][dir]=1;
+      m[nr][nc][[Sd,Nd,Ed,Wd][dir]]=1;
+      vis[nr][nc]=true;
+      stack.push([nr,nc]);
+      moved=true;break;
+    }
+    if(!moved)stack.pop();
+  }
+  m[EXIT_R][EXIT_L_C][Wd]=1;
+  m[EXIT_R][EXIT_R_C][Ed]=1;
+  return m;
+}
+
+let MAZE=generateMaze();
+
+// ── Find dead-ends and place 2 static candles ──
+function findDeadEnds(maze){
+  const forbidden=new Set([`${START_R},${START_C}`,`${EXIT_R},${EXIT_L_C}`,`${EXIT_R},${EXIT_R_C}`]);
+  const dead=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(forbidden.has(`${r},${c}`))continue;
+    const open=maze[r][c][Nd]+maze[r][c][Sd]+maze[r][c][Wd]+maze[r][c][Ed];
+    if(open===1)dead.push([r,c]);
+  }
+  return dead;
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+let SC_POSITIONS=[];
+let scLit={};
+
+function initCandles(){
+  const dead=shuffle(findDeadEnds(MAZE));
+  SC_POSITIONS=dead.slice(0,Math.min(3,dead.length));
+  scLit={};
+  SC_POSITIONS.forEach(([r,c])=>{scLit[`${r},${c}`]=false;});
+}
+
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+let pR=START_R,pC=START_C,steps=0,gameActive=false,candleLit=true;
+
+// Monster FSM: 'idle' | 'watching' | 'chasing'
+// watching: monster is in player FOV and has LOS — stays still, extinguishes on next move if LOS holds
+// chasing:  player broke LOS while monster was watching — monster moves toward player for mChase turns
+let mR=-1,mC=-1,mMode='idle',mChase=0;
+let runeAvailable=true; // one use per game
+
+// ══════════════════════════════════════════════════════════
+// DOM
+// ══════════════════════════════════════════════════════════
+const gridEl=document.getElementById('grid');
+const playerTok=document.getElementById('player-token');
+const monsterTok=document.getElementById('monster-token');
+const stepsEl=document.getElementById('steps-counter');
+const candleSt=document.getElementById('candle-status');
+const statusBar=document.getElementById('status-bar');
+const overlay=document.getElementById('overlay');
+const overlayTitle=document.getElementById('overlay-title');
+const overlaySub=document.getElementById('overlay-sub');
+const overlayBtn=document.getElementById('overlay-btn');
+const cellEls=[];
+
+// ══════════════════════════════════════════════════════════
+// BUILD GRID
+// ══════════════════════════════════════════════════════════
+function buildGrid(){
+  gridEl.innerHTML='';cellEls.length=0;
+  for(let r=0;r<ROWS;r++){
+    cellEls[r]=[];
+    for(let c=0;c<COLS;c++){
+      const cell=document.createElement('div');
+      cell.className='cell dark';
+      const corr=document.createElement('div');
+      corr.className='corridor';
+      const[cn,cs,cw,ce]=MAZE[r][c];
+      if(!cn)corr.classList.add('wall-n');
+      if(!cs)corr.classList.add('wall-s');
+      if(!cw)corr.classList.add('wall-w');
+      if(!ce)corr.classList.add('wall-e');
+      cell.appendChild(corr);
+      if(r===EXIT_R&&c===EXIT_L_C){const x=document.createElement('div');x.className='exit-candle red';cell.appendChild(x);}
+      if(r===EXIT_R&&c===EXIT_R_C){const x=document.createElement('div');x.className='exit-candle green';cell.appendChild(x);}
+      if(scLit.hasOwnProperty(`${r},${c}`)){
+        const sc=document.createElement('div');
+        sc.className='static-candle unlit';
+        sc.id=`sc-${r}-${c}`;
+        cell.appendChild(sc);
+      }
+      gridEl.appendChild(cell);
+      cellEls[r][c]=cell;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// LIT CELLS SET
+// Player cell always included regardless of candle state.
+// When candle is lit: +4 passable neighbors.
+// Static candles: illuminate their own cell only.
+// ══════════════════════════════════════════════════════════
+function getLitSet(){
+  const lit=new Set([`${pR},${pC}`]);
+  if(candleLit){
+    [[Nd,-1,0],[Sd,1,0],[Wd,0,-1],[Ed,0,1]].forEach(([dir,dr,dc])=>{
+      if(!MAZE[pR][pC][dir])return;
+      const nr=pR+dr,nc=pC+dc;
+      if(nr<0||nr>=ROWS||nc<0||nc>=COLS)return;
+      if(!MAZE[nr][nc][[Sd,Nd,Ed,Wd][dir]])return;
+      lit.add(`${nr},${nc}`);
+    });
+  }
+  SC_POSITIONS.forEach(([r,c])=>{if(scLit[`${r},${c}`])lit.add(`${r},${c}`);});
+  return lit;
+}
+
+// ══════════════════════════════════════════════════════════
+// UPDATE LIGHTING
+// ══════════════════════════════════════════════════════════
+function updateLighting(){
+  const lit=getLitSet();
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const el=cellEls[r][c];
+    const key=`${r},${c}`;
+    el.classList.remove('lit','player-cell','exit-left','exit-right','static-lit');
+    if(lit.has(key)){
+      el.classList.remove('dark');el.classList.add('lit');
+      if(r===pR&&c===pC)el.classList.add('player-cell');
+      if(r===EXIT_R&&c===EXIT_L_C)el.classList.add('exit-left');
+      if(r===EXIT_R&&c===EXIT_R_C)el.classList.add('exit-right');
+      if(scLit[key])el.classList.add('static-lit');
+    }else{
+      el.classList.add('dark');
+    }
+  }
+  SC_POSITIONS.forEach(([r,c])=>{
+    const sc=document.getElementById(`sc-${r}-${c}`);
+    if(sc)sc.className='static-candle '+(scLit[`${r},${c}`]?'lit-yellow':'unlit');
+  });
+  playerTok.classList.toggle('candle-out',!candleLit);
+  candleSt.textContent=candleLit?'свеча горит':'свеча погашена';
+  candleSt.className=candleLit?'':'out';
+}
+
+// ══════════════════════════════════════════════════════════
+// LINE OF SIGHT — same row or column, no walls between
+// ══════════════════════════════════════════════════════════
+function los(r1,c1,r2,c2){
+  if(r1===r2&&c1===c2)return true;
+  if(r1!==r2&&c1!==c2)return false;
+  if(r1===r2){
+    const mn=Math.min(c1,c2),mx=Math.max(c1,c2);
+    for(let c=mn;c<mx;c++)if(!MAZE[r1][c][Ed]||!MAZE[r1][c+1][Wd])return false;
+    return true;
+  }else{
+    const mn=Math.min(r1,r2),mx=Math.max(r1,r2);
+    for(let r=mn;r<mx;r++)if(!MAZE[r][c1][Sd]||!MAZE[r+1][c1][Nd])return false;
+    return true;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// MONSTER RENDER
+// ══════════════════════════════════════════════════════════
+function renderMonster(){
+  if(mR<0){monsterTok.style.display='none';monsterTok.classList.remove('force-visible','chasing');return;}
+  const vis=getLitSet().has(`${mR},${mC}`);
+  const forceShow=mMode==='chasing'||mMode==='spotted'; // always visible while spotted/chasing
+  if(vis||forceShow){
+    monsterTok.style.display='block';
+    monsterTok.style.left=(mC*CELL_SIZE+CELL_SIZE/2)+'px';
+    monsterTok.style.top=(mR*CELL_SIZE+CELL_SIZE/2)+'px';
+    monsterTok.classList.toggle('chasing',mMode==='chasing');
+    monsterTok.classList.toggle('force-visible',forceShow&&!vis);
+  }else{
+    monsterTok.style.display='none';
+    monsterTok.classList.remove('force-visible');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// BFS — one step toward target
+// ══════════════════════════════════════════════════════════
+function bfsStep(fr,fc,tr,tc){
+  if(fr===tr&&fc===tc)return null;
+  const vis=new Set([`${fr},${fc}`]);
+  const q=[{r:fr,c:fc,first:null}];
+  while(q.length){
+    const{r,c,first}=q.shift();
+    for(const[dir,dr,dc]of[[Nd,-1,0],[Sd,1,0],[Wd,0,-1],[Ed,0,1]]){
+      if(!MAZE[r][c][dir])continue;
+      const nr=r+dr,nc=c+dc;
+      if(nr<0||nr>=ROWS||nc<0||nc>=COLS)continue;
+      if(!MAZE[nr][nc][[Sd,Nd,Ed,Wd][dir]])continue;
+      const key=`${nr},${nc}`;
+      if(vis.has(key))continue;
+      vis.add(key);
+      const step=first||{r:nr,c:nc};
+      if(nr===tr&&nc===tc)return step;
+      q.push({r:nr,c:nc,first:step});
+    }
+  }
+  return null;
+}
+
+function moveMonsterToward(tr,tc){
+  const s=bfsStep(mR,mC,tr,tc);
+  if(s){mR=s.r;mC=s.c;}
+}
+
+// ══════════════════════════════════════════════════════════
+// SPAWN MONSTER — avoid player, exits, static candles, LOS
+// ══════════════════════════════════════════════════════════
+function spawnMonster(){
+  const forbidden=new Set([`${pR},${pC}`,`${EXIT_R},${EXIT_L_C}`,`${EXIT_R},${EXIT_R_C}`]);
+  SC_POSITIONS.forEach(([r,c])=>forbidden.add(`${r},${c}`));
+  const cands=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(!forbidden.has(`${r},${c}`)&&!los(r,c,pR,pC))cands.push([r,c]);
+  }
+  const pool=cands.length?cands:[[0,0]];
+  const[r,c]=pool[Math.floor(Math.random()*pool.length)];
+  mR=r;mC=c;mMode='idle';mChase=0;
+}
+
+// ══════════════════════════════════════════════════════════
+// MONSTER FSM
+//
+// idle     → monster exists but is not seen. When player's
+//            FOV includes the monster cell → 'watching'.
+//
+// watching → monster is visible AND has LOS to player.
+//            On the NEXT player move, if LOS still holds:
+//            extinguish. If player breaks LOS → 'chasing'.
+//
+// chasing  → monster moves 1 step toward player per turn.
+//            Counter starts at 3. Each turn:
+//              - move toward player
+//              - if LOS restored → extinguish, back to 'watching'
+//              - else decrement counter; if 0 → dissolve + respawn
+// ══════════════════════════════════════════════════════════
+function monsterTurn(){
+  if(mR<0)return;
+
+  // ── idle: monster not yet seen ──
+  // When monster enters player FOV → transition to 'spotted'.
+  // No movement this turn; player sees the monster for the first time.
+  if(mMode==='idle'){
+    const monVisible=getLitSet().has(`${mR},${mC}`);
+    if(monVisible) mMode='spotted';
+    return;
+  }
+
+  // ── spotted: monster was visible last turn ──
+  // This turn: start chasing immediately and make the first move.
+  // Also check LOS — if player is still in direct sight, extinguish candle.
+  if(mMode==='spotted'){
+    mMode='chasing';
+    mChase=4;
+    if(los(mR,mC,pR,pC) && candleLit) candleLit=false;
+    moveMonsterToward(pR,pC);
+    mChase--;
+    if(mChase<=0){
+      mR=-1;mC=-1;mMode='idle';
+      setTimeout(()=>{ if(!gameActive)return; spawnMonster();renderMonster();updateRuneBtn(); },700);
+    }
+    return;
+  }
+
+  // ── chasing: move toward player each turn ──
+  // If LOS holds at the moment of this move → extinguish candle.
+  // mChase counts down regardless of LOS state.
+  if(mMode==='chasing'){
+    if(los(mR,mC,pR,pC) && candleLit) candleLit=false;
+    moveMonsterToward(pR,pC);
+    mChase--;
+    if(mChase<=0){
+      mR=-1;mC=-1;mMode='idle';
+      setTimeout(()=>{ if(!gameActive)return; spawnMonster();renderMonster();updateRuneBtn(); },700);
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// STATUS BAR
+// ══════════════════════════════════════════════════════════
+function updateStatus(){
+  if(!gameActive){statusBar.textContent='';statusBar.className='';return;}
+  const monVisible=mR>=0&&getLitSet().has(`${mR},${mC}`);
+  if(mMode==='spotted'&&monVisible){
+    statusBar.textContent='ОНО ТЕБЯ НАШЛО';statusBar.className='danger';
+  }else if(mMode==='chasing'){
+    statusBar.textContent='ПРЕСЛЕДОВАНИЕ  '+mChase;statusBar.className='chase';
+  }else if(!candleLit){
+    statusBar.textContent='свеча погашена — зажги ее';statusBar.className='';
+  }else{
+    statusBar.textContent='';statusBar.className='';
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// PLAYER TOKEN
+// ══════════════════════════════════════════════════════════
+function updatePlayerToken(){
+  playerTok.style.left=(pC*CELL_SIZE+CELL_SIZE/2)+'px';
+  playerTok.style.top=(pR*CELL_SIZE+CELL_SIZE/2)+'px';
+}
+
+// ══════════════════════════════════════════════════════════
+// MOVE
+// Movement rules when candle is OUT:
+//   - Player can always move to an adjacent corridor cell,
+//     even if it is not in the lit set (only current cell lit).
+//   - Target cell must still be a valid corridor neighbor.
+// ══════════════════════════════════════════════════════════
+const DIR_MAP={'w':[Nd,-1,0],'s':[Sd,1,0],'a':[Wd,0,-1],'d':[Ed,0,1]};
+const BUMP={'w':'translate(0,-5px)','s':'translate(0,5px)','a':'translate(-5px,0)','d':'translate(5px,0)'};
+
+function tryMove(key){
+  if(!gameActive)return;
+  const k=key.toLowerCase();
+  if(!DIR_MAP[k])return;
+  const[dir,dr,dc]=DIR_MAP[k];
+  const nr=pR+dr,nc=pC+dc;
+
+  // Boundary exit
+  if(nr<0||nr>=ROWS||nc<0||nc>=COLS){
+    if(pR===EXIT_R&&pC===EXIT_L_C&&k==='a'){triggerWin('left');return;}
+    if(pR===EXIT_R&&pC===EXIT_R_C&&k==='d'){triggerWin('right');return;}
+    bumpP(k);return;
+  }
+
+  // Corridor validity
+  if(!MAZE[pR][pC][dir]){bumpP(k);return;}
+  if(!MAZE[nr][nc][[Sd,Nd,Ed,Wd][dir]]){bumpP(k);return;}
+
+  // Lit check — ONLY when candle is burning
+  // When candle is out, any valid corridor neighbor is reachable
+  if(candleLit&&!getLitSet().has(`${nr},${nc}`)){bumpP(k);return;}
+
+  // Perform move
+  pR=nr;pC=nc;
+  steps++;
+  stepsEl.textContent='Шагов: '+steps;
+
+  // Static candle interaction
+  const scKey=`${pR},${pC}`;
+  if(scLit.hasOwnProperty(scKey)){
+    if(!scLit[scKey]&&candleLit)scLit[scKey]=true;   // ignite unlit candle
+    if(scLit[scKey]&&!candleLit)candleLit=true;        // relight player candle
+  }
+
+  // Monster acts after player moves
+  monsterTurn();
+
+  updateLighting();
+  updatePlayerToken();
+  renderMonster();
+  updateStatus();
+  updateRuneBtn();
+
+  // Death: player stepped onto monster's cell
+  if(mR>=0&&pR===mR&&pC===mC){triggerDeath();return;}
+
+  // No prompt on exit cell — player continues freely
+}
+
+function bumpP(k){
+  playerTok.style.setProperty('--bd',BUMP[k]||'translate(0,0)');
+  playerTok.classList.remove('bump');
+  void playerTok.offsetWidth;
+  playerTok.classList.add('bump');
+}
+
+
+// ══════════════════════════════════════════════════════════
+// RUNE — one-use monster repel
+// Active only when monster is visible (in getLitSet)
+// ══════════════════════════════════════════════════════════
+const runeBtnEl=document.getElementById('rune-btn');
+
+function updateRuneBtn(){
+  if(!runeAvailable){runeBtnEl.disabled=true;runeBtnEl.textContent='⟁ Руна использована';return;}
+  // Rune available when monster is visually present: in FOV OR force-shown during spotted/chasing
+  const monInFov=mR>=0&&getLitSet().has(`${mR},${mC}`);
+  const monForced=mR>=0&&(mMode==='chasing'||mMode==='spotted');
+  const monVisible=monInFov||monForced;
+  runeBtnEl.disabled=!monVisible||!gameActive;
+}
+
+function activateRune(){
+  if(!runeAvailable||!gameActive)return;
+  if(mR<0)return;
+  const monInFov=getLitSet().has(`${mR},${mC}`);
+  const monForced=mMode==='chasing'||mMode==='spotted';
+  if(!monInFov&&!monForced)return;
+  runeAvailable=false;
+  mR=-1;mC=-1;mMode='idle';mChase=0; // clears spotted/chasing too
+  // Flash effect on token before hiding
+  monsterTok.classList.remove('force-visible','chasing');
+  monsterTok.style.display='none';
+  setTimeout(()=>{
+    if(!gameActive)return;
+    spawnMonster();renderMonster();
+  },800);
+  updateLighting();updateRuneBtn();updateStatus();
+}
+
+// ══════════════════════════════════════════════════════════
+// EXIT PROMPT (step on exit cell)
+// ══════════════════════════════════════════════════════════
+const overlayBtns=document.getElementById('overlay-btns');
+
+function showExitPrompt(side){
+  // Pause input but don't set gameActive=false yet
+  gameActive=false;
+  const L=side==='left';
+  overlay.className='active exit-prompt';
+  overlayTitle.textContent=L?'Красный Выход':'Зелёный Выход';
+  overlaySub.textContent='Покинуть лабиринт?';
+  overlayBtns.innerHTML='';
+  const btnConfirm=document.createElement('button');
+  btnConfirm.className='overlay-btn';
+  btnConfirm.textContent='Выйти';
+  btnConfirm.onclick=()=>triggerWin(side);
+  const btnStay=document.createElement('button');
+  btnStay.className='overlay-btn';
+  btnStay.textContent='Остаться';
+  btnStay.onclick=()=>{
+    overlay.className='';overlay.classList.remove('active');
+    gameActive=true;
+  };
+  overlayBtns.appendChild(btnConfirm);
+  overlayBtns.appendChild(btnStay);
+}
+
+// ══════════════════════════════════════════════════════════
+// WIN (confirmed exit)
+// ══════════════════════════════════════════════════════════
+function triggerWin(side){
+  gameActive=false;
+  const L=side==='left';
+  overlay.className='active '+(L?'win-left':'win-right');
+  overlayTitle.textContent=L?'Красный Свет':'Зелёный Свет';
+  overlaySub.textContent='Выход найден за '+steps+' шагов';
+  overlayBtns.innerHTML='';
+  const btn=document.createElement('button');
+  btn.className='overlay-btn';
+  btn.textContent='Снова';
+  btn.onclick=startGame;
+  overlayBtns.appendChild(btn);
+}
+
+// ══════════════════════════════════════════════════════════
+// DEATH
+// ══════════════════════════════════════════════════════════
+function triggerDeath(){
+  gameActive=false;
+  overlay.className='active death';
+  overlayTitle.textContent='Темнота';
+  overlaySub.textContent='Ты встретил его в темноте. Шагов пройдено: '+steps;
+  overlayBtns.innerHTML='';
+  const btn=document.createElement('button');
+  btn.className='overlay-btn';
+  btn.textContent='Начать заново';
+  btn.onclick=startGame;
+  overlayBtns.appendChild(btn);
+}
+
+// ══════════════════════════════════════════════════════════
+// START / RESET
+// ══════════════════════════════════════════════════════════
+function startGame(){
+  MAZE=generateMaze();
+  initCandles();
+  pR=START_R;pC=START_C;steps=0;candleLit=true;
+  mR=-1;mC=-1;mMode='idle';mChase=0;
+  runeAvailable=true;
+  stepsEl.textContent='Шагов: 0';
+  buildGrid();
+  updateLighting();
+  updatePlayerToken();
+  monsterTok.style.display='none';monsterTok.classList.remove('force-visible','chasing');
+  statusBar.textContent='';statusBar.className='';
+  if(typeof updateRuneBtn==='function')updateRuneBtn();
+  overlayBtns.innerHTML='';
+  const btn=document.createElement('button');
+  btn.className='overlay-btn';btn.textContent='Войти';btn.onclick=startGame;
+  overlayBtns.appendChild(btn);
+  gameActive=true;
+  overlay.className='';overlay.classList.remove('active');
+  setTimeout(()=>{if(!gameActive)return;spawnMonster();renderMonster();},900);
+}
+
+// ══════════════════════════════════════════════════════════
+// INPUT
+// ══════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (!gameActive) return;
+
+  let dir = null;
+
+  switch (e.code) {
+    case 'KeyW':
+    case 'ArrowUp':
+      dir = 'w';
+      break;
+    case 'KeyA':
+    case 'ArrowLeft':
+      dir = 'a';
+      break;
+    case 'KeyS':
+    case 'ArrowDown':
+      dir = 's';
+      break;
+    case 'KeyD':
+    case 'ArrowRight':
+      dir = 'd';
+      break;
+    case 'KeyR':
+      e.preventDefault();
+      activateRune();
+      return;
+  }
+
+  if (dir) {
+    e.preventDefault();
+    tryMove(dir);
+  }
+});
+
+let tx=0,ty=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)<12&&Math.abs(dy)<12)return;
+  tryMove(Math.abs(dx)>Math.abs(dy)?(dx>0?'d':'a'):(dy>0?'s':'w'));
+},{passive:true});
+// overlay buttons are managed dynamically in startGame / triggerWin / triggerDeath
+
+// Initial silent build for overlay background
+MAZE=generateMaze();initCandles();buildGrid();updateLighting();updatePlayerToken();
+</script>
+</body>
+</html>
