@@ -1,5 +1,5 @@
 ---
-prev chapter: "[[Пролог]]"
+prev chapter: "[[Перенесено из Google Doc]]"
 next chapter: "[[Глава II]]"
 ---
 ### Место действия
