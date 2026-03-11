@@ -241,6 +241,23 @@ button.finish-btn{width:100%;padding:9px;margin-top:4px;letter-spacing:0.3em;}
   30%{transform:var(--bd) translate(-50%,-50%);}
   100%{transform:translate(0,0) translate(-50%,-50%);}}
 .bump{animation:bump 0.14s ease;}
+
+/* ── Tooltip ── */
+#graph-tooltip {
+  position: fixed;
+  z-index: 9999;
+  max-width: 260px;
+  background: #080706;
+  border: 1px solid #3a2e22;
+  color: #c4a882;
+  font-family: 'IM Fell English', serif;
+  font-size: 11px;
+  line-height: 1.65;
+  padding: 10px 13px;
+  pointer-events: none;
+  display: none;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.8);
+}
 </style>
 </head>
 <body>
@@ -287,10 +304,7 @@ button.finish-btn{width:100%;padding:9px;margin-top:4px;letter-spacing:0.3em;}
       <div class="panel-label">Найденные подсказки</div>
       <div id="foundList" class="small">—</div>
     </div>
-    <div class="panel">
-      <div class="panel-label">Описание</div>
-      <div id="dynamicText" class="small">—</div>
-    </div>
+
     <div class="panel">
       <div class="panel-label">Вердикт</div>
       <div class="verdict-text" id="verdict">—</div>
@@ -329,7 +343,7 @@ button.finish-btn{width:100%;padding:9px;margin-top:4px;letter-spacing:0.3em;}
     </div>
     <div id="status-bar"></div>
     <div id="controls-hint">W A S D — движение</div>
-    <button id="rune-btn" disabled onclick="activateRune()">⟁ Руна отпугивания &nbsp;[R]</button>
+    <button id="rune-btn" disabled onclick="activateRune()">ᚦ Руна отпугивания &nbsp;[R]</button>
   </div>
 
   <!-- Maze overlay (entry/death/result) -->
@@ -345,8 +359,8 @@ button.finish-btn{width:100%;padding:9px;margin-top:4px;letter-spacing:0.3em;}
 // GRAPH DATA
 // ═══════════════════════════════════════════════════════════
 const CLUES = [
-  {id:'c2', artifact:0, alignment:'naive',  title:'Детский рисунок Сигурда на Черном Стяге'},
-  {id:'c3', artifact:1, alignment:'naive',  title:'Расколотый детский щит Сигурда'},
+  {id:'c2', artifact:0, alignment:'naive',  title:'Детский рисунок Гримлиса на Черном Стяге'},
+  {id:'c3', artifact:1, alignment:'naive',  title:'Расколотый детский щит Гримлиса'},
   {id:'c4', artifact:1, alignment:'cynic',  title:'Детские следы, ведущие к реке'},
   {id:'c5', artifact:2, alignment:'cynic',  title:'Высокая строительная лестница'},
   {id:'c6', artifact:2, alignment:'naive',  title:'Детский рисунок великана'},
@@ -354,25 +368,25 @@ const CLUES = [
 ];
 const CLUE_TEXTS = {
   'c1':'На коре дерева рядом с костром начертана детской рукой та же руна, что и на стяге.',
-  'c2':'К руне на стяге пририсован краской детский рисунок лошадки Сигурда.',
-  'c3':'В стороне валяется сломанный детский щит Сигурда.',
-  'c4':'От копья Сигурда в сторону реки ведут детские лисьи следы.',
+  'c2':'К руне на стяге пририсован краской детский рисунок лошадки Гримлиса.',
+  'c3':'В стороне валяется сломанный детский щит Гримлиса.',
+  'c4':'От копья Гримлиса в сторону реки ведут детские лисьи следы.',
   'c5':'В стороне есть строительная лестница, на которую взбирались строители столпа.',
   'c6':'Рядом со столпом лежит грубый детский рисунок углем, изображающий великана.'
 };
-const ARTIFACT_TITLES=['Черный стяг ётунов','Копье Сигурда','Огромный сигнальный столп'];
+const ARTIFACT_TITLES=['Черный стяг ётунов','Копье Гримлиса','Огромный сигнальный столп'];
 const ARTIFACT_TEXTS={
   0:{unknown:'Черный стяг с руной ётунов.',
-     naive:'Сигурд дорисовал любимую игрушку, не понимая значения символа.',
-     cynic:'Сигурд хотел призвать ётунов, нарисовав руну их страны.'},
-  1:{unknown:'Старое копье Сигурда у кострища. Чистое.',
-     naive:'Во время нападения Сигурд прикрывался щитом.',
-     cynic:'Сигурд бросил оружие и убежал в сторону реки.'},
+     naive:'Гримлис дорисовал любимую игрушку, не понимая значения символа.',
+     cynic:'Гримлис хотел призвать ётунов, нарисовав руну их страны.'},
+  1:{unknown:'Старое копье Гримлиса у кострища. Чистое.',
+     naive:'Во время нападения Гримлис прикрывался щитом.',
+     cynic:'Гримлис бросил оружие и убежал в сторону реки.'},
   2:{unknown:'Огромный столп с рунами.',
      naive:'Столп возвели люди для проплывающих торговцев.',
      cynic:'Столп возвели ётуны — руны на уровне их роста.'}
 };
-const LINKED_ARTIFACTS=[0,1];
+const LINKED_ARTIFACTS=[1,2];
 const numArtifacts=3;
 
 // Graph state
@@ -394,8 +408,36 @@ function createSVG(){
   board.appendChild(svg);return svg;
 }
 
-function showClueDesc(id){document.getElementById('dynamicText').innerHTML=CLUE_TEXTS[id]||'—';}
-function showArtifactDesc(i){document.getElementById('dynamicText').innerHTML=ARTIFACT_TEXTS[i][artifactState[i]]||'—';}
+let tooltipTimeout = null;
+
+function showTooltip(text, evt) {
+  const tt = document.getElementById('graph-tooltip');
+  if (!tt) return;
+  tt.textContent = text;
+  const pad = 14, tw = 270, th = 90;
+  let x = evt.clientX + pad, y = evt.clientY + pad;
+  if (x + tw > window.innerWidth)  x = evt.clientX - tw - pad;
+  if (y + th > window.innerHeight) y = evt.clientY - th - pad;
+  tt.style.left = x + 'px';
+  tt.style.top  = y + 'px';
+  tt.style.display = 'block';
+  clearTimeout(tooltipTimeout);
+  tooltipTimeout = setTimeout(hideTooltip, 5000);
+}
+
+function hideTooltip() {
+  const tt = document.getElementById('graph-tooltip');
+  if (tt) tt.style.display = 'none';
+}
+
+document.addEventListener('click', hideTooltip);
+
+function showClueDesc(id, evt){
+  showTooltip(CLUE_TEXTS[id]||'—', evt);
+}
+function showArtifactDesc(i, evt){
+  showTooltip(ARTIFACT_TEXTS[i][artifactState[i]]||'—', evt);
+}
 
 function createUI(){
   board.innerHTML='';
@@ -404,7 +446,7 @@ function createUI(){
   const main=document.createElement('div');
   main.className='node main';
   main.style.left=(W/2-80)+'px';main.style.top=(H/2-80)+'px';
-  main.innerHTML=`<div style="padding:0 10px">Предал ли<br>Сигурд отца?</div>
+  main.innerHTML=`<div style="padding:0 10px">Предал ли<br>Гримлис отца?</div>
     <div id="mainState" style="margin-top:10px;font-size:11px;letter-spacing:0.12em;color:var(--yellow-dim)"></div>`;
   board.appendChild(main);
 
@@ -420,7 +462,7 @@ function createUI(){
     a.innerHTML=`<div style="padding:0 8px">${ARTIFACT_TITLES[i]}</div>
       <div id="art-${i}-state" style="font-size:9px;margin-top:6px;letter-spacing:0.1em"></div>`;
     a.onclick=()=>onArtifactClick(i);
-    a.oncontextmenu=e=>{e.preventDefault();showArtifactDesc(i);};
+    a.oncontextmenu=e=>{e.preventDefault();showArtifactDesc(i,e);};
     board.appendChild(a);
   }
 
@@ -434,19 +476,20 @@ function createUI(){
     el.id=c.id;el.style.left=x+'px';el.style.top=y+'px';
     el.innerHTML=`<div style="padding:0 4px;font-size:9px">${c.title}</div>`;
     el.onclick=()=>onClueClick(c.id);
-    el.oncontextmenu=e=>{e.preventDefault();showClueDesc(c.id);};
+    el.oncontextmenu=e=>{e.preventDefault();showClueDesc(c.id,e);};
     board.appendChild(el);
   });
 
-  // Dashed link line between artifacts 0 and 1
-  const art0=document.getElementById('artifact-0'),art1=document.getElementById('artifact-1');
-  if(art0&&art1){
+  // Dashed link line between linked artifacts (1 and 2)
+  const la=LINKED_ARTIFACTS[0], lb=LINKED_ARTIFACTS[1];
+  const artA=document.getElementById('artifact-'+la), artB=document.getElementById('artifact-'+lb);
+  if(artA&&artB){
     const svg=createSVG();
     const br=board.getBoundingClientRect();
-    const r0=art0.getBoundingClientRect(),r1=art1.getBoundingClientRect();
+    const rA=artA.getBoundingClientRect(), rB=artB.getBoundingClientRect();
     const line=document.createElementNS("http://www.w3.org/2000/svg","line");
-    line.setAttribute("x1",r0.left-br.left+r0.width/2);line.setAttribute("y1",r0.top-br.top+r0.height/2);
-    line.setAttribute("x2",r1.left-br.left+r1.width/2);line.setAttribute("y2",r1.top-br.top+r1.height/2);
+    line.setAttribute("x1",rA.left-br.left+rA.width/2);line.setAttribute("y1",rA.top-br.top+rA.height/2);
+    line.setAttribute("x2",rB.left-br.left+rB.width/2);line.setAttribute("y2",rB.top-br.top+rB.height/2);
     line.setAttribute("stroke","#3a2e22");line.setAttribute("stroke-width","2");
     line.setAttribute("stroke-dasharray","7,4");line.id='link-line';
     svg.appendChild(line);
@@ -633,7 +676,7 @@ document.getElementById('resetBtn').onclick=()=>{
   CLUES.forEach(c=>found[c.id]=false);
   for(let i=0;i<numArtifacts;i++){artifactState[i]='unknown';artifactLocked[i]=false;}
   chapterFinished=false;
-  document.getElementById('dynamicText').innerHTML='—';
+  hideTooltip();
   refreshUI();
 };
 document.getElementById('randomBtn').onclick=()=>{
@@ -935,7 +978,7 @@ function monsterTurn(){
 function updateStatus(){
   if(!gameActive){statusBar.textContent='';statusBar.className='';return;}
   const monVisible=mR>=0&&getLitSet().has(`${mR},${mC}`);
-  if(mMode==='spotted'&&monVisible){statusBar.textContent='ПРИЗРАК ПРОШЛОГО НАШЕЛ ТЕБЯ';statusBar.className='danger';}
+  if(mMode==='spotted'&&monVisible){statusBar.textContent='ОНО СМОТРИТ НА ТЕБЯ';statusBar.className='danger';}
   else if(mMode==='chasing'){statusBar.textContent='ПРЕСЛЕДОВАНИЕ  '+mChase;statusBar.className='chase';}
   else if(!candleLit){statusBar.textContent='свеча погашена — найди огонь в тупике';statusBar.className='';}
   else{statusBar.textContent='';statusBar.className='';}
@@ -950,7 +993,7 @@ function updatePlayerToken(){
 // MAZE — RUNE
 // ═══════════════════════════════════════════════════════════
 function updateRuneBtn(){
-  if(!runeAvailable){runeBtnEl.disabled=true;runeBtnEl.textContent='⟁ Руна использована';return;}
+  if(!runeAvailable){runeBtnEl.disabled=true;runeBtnEl.textContent='ᚦ Руна использована';return;} //⟁ 
   const monInFov=mR>=0&&getLitSet().has(`${mR},${mC}`);
   const monForced=mR>=0&&(mMode==='chasing'||mMode==='spotted');
   runeBtnEl.disabled=!(monInFov||monForced)||!gameActive;
@@ -1062,7 +1105,7 @@ function startGame(){
   // Entry overlay
   overlay.className='active start';
   overlayTitle.textContent='The Labyrinth';
-  overlaySub.textContent='Найди выход из лабиринта закоулков своих воспоминаний.';
+  overlaySub.textContent='Найди выход. Не смотри в глаза.';
   overlayBtns.innerHTML='';
   const btn=document.createElement('button');btn.className='overlay-btn';btn.textContent='Войти';
   btn.onclick=()=>{
@@ -1100,5 +1143,6 @@ document.addEventListener('touchend',e=>{
 // ═══════════════════════════════════════════════════════════
 createUI();
 </script>
+<div id="graph-tooltip"></div>
 </body>
 </html>
