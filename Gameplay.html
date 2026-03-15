@@ -242,6 +242,35 @@ button.finish-btn{width:100%;padding:9px;margin-top:4px;letter-spacing:0.3em;}
   100%{transform:translate(0,0) translate(-50%,-50%);}}
 .bump{animation:bump 0.14s ease;}
 
+
+/* ── Alter-ego token ── */
+#altego-token {
+  position:absolute;width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#d0b8f0,#8040c0 50%,#5020a0 100%);
+  box-shadow:0 0 7px 3px rgba(160,80,255,0.65),0 0 18px 6px rgba(160,80,255,0.25);
+  transform:translate(-50%,-50%);transition:left 0.15s ease,top 0.15s ease;
+  pointer-events:none;z-index:10;display:none;
+  animation:flicker-alt 3.2s ease-in-out infinite;
+}
+#altego-token::after{content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  width:4px;height:9px;background:linear-gradient(to top,#a060ff,rgba(160,80,255,0.2),transparent);
+  border-radius:50% 50% 30% 30%;animation:flame-alt 0.85s ease-in-out infinite alternate;}
+#altego-token.candle-out{background:#120818;box-shadow:0 0 3px 1px rgba(60,10,80,0.3);animation:none;}
+#altego-token.candle-out::after{display:none;}
+@keyframes flicker-alt{
+  0%,100%{box-shadow:0 0 7px 3px rgba(160,80,255,0.65),0 0 18px 6px rgba(160,80,255,0.25);}
+  35%{box-shadow:0 0 5px 2px rgba(160,80,255,0.5),0 0 13px 4px rgba(160,80,255,0.18);}
+  65%{box-shadow:0 0 9px 4px rgba(160,80,255,0.75),0 0 22px 8px rgba(160,80,255,0.3);}}
+@keyframes flame-alt{from{height:7px;opacity:0.9;}to{height:11px;opacity:0.5;}}
+/* Player's target exit highlight */
+.cell.player-target-exit { outline: 2px solid var(--yellow); outline-offset:-2px; }
+/* Blocked exit in arbiter mode */
+.cell.arbiter-blocked-exit { outline: 2px solid rgba(80,40,40,0.7); outline-offset:-2px; }
+.cell.arbiter-blocked-exit .exit-candle { filter: grayscale(1) brightness(0.3); }
+/* Arbiter mode — alt-ego's lit cells always shown */
+.cell.altlit { background:#09070d !important; }
+.cell.altlit .corridor { background:#09070d; }
+
 /* ── Tooltip ── */
 #graph-tooltip {
   position: fixed;
@@ -328,6 +357,7 @@ button.finish-btn{width:100%;padding:9px;margin-top:4px;letter-spacing:0.3em;}
     <div id="game-container">
       <div id="grid"></div>
       <div id="player-token"></div>
+      <div id="altego-token"></div>
       <div id="monster-token">
         <svg viewBox="0 0 24 24" fill="none">
           <ellipse cx="12" cy="14" rx="7.5" ry="8.5" fill="#140606"/>
@@ -359,25 +389,25 @@ button.finish-btn{width:100%;padding:9px;margin-top:4px;letter-spacing:0.3em;}
 // GRAPH DATA
 // ═══════════════════════════════════════════════════════════
 const CLUES = [
-  {id:'c2', artifact:0, alignment:'naive',  title:'Детский рисунок Гримлиса на Черном Стяге'},
-  {id:'c3', artifact:1, alignment:'naive',  title:'Расколотый детский щит Гримлиса'},
-  {id:'c4', artifact:1, alignment:'cynic',  title:'Детские следы, ведущие к реке'},
+  {id:'c2', artifact:0, alignment:'naive',  title:'Рисунок Гримлиса на Черном Стяге'},
+  {id:'c3', artifact:1, alignment:'naive',  title:'Расколотый щит Гримлиса'},
+  {id:'c4', artifact:1, alignment:'cynic',  title:'Следы, ведущие к реке'},
   {id:'c5', artifact:2, alignment:'cynic',  title:'Высокая строительная лестница'},
-  {id:'c6', artifact:2, alignment:'naive',  title:'Детский рисунок великана'},
+  {id:'c6', artifact:2, alignment:'naive',  title:'Рисунок великана'},
   {id:'c1', artifact:0, alignment:'cynic',  title:'Руны Ётунхейма вокруг кострища'}
 ];
 const CLUE_TEXTS = {
-  'c1':'На коре дерева рядом с костром начертана детской рукой та же руна, что и на стяге.',
-  'c2':'К руне на стяге пририсован краской детский рисунок лошадки Гримлиса.',
-  'c3':'В стороне валяется сломанный детский щит Гримлиса.',
-  'c4':'От копья Гримлиса в сторону реки ведут детские лисьи следы.',
+  'c1':'На коре дерева рядом с костром начертана та же руна, что и на стяге, и ещё несколько.',
+  'c2':'Рисунок Гримлиса. К ворону на стяге пририсован большой лис.',
+  'c3':'В стороне валяется сломанный маленький щит Гримлиса.',
+  'c4':'От копья Гримлиса в сторону реки ведут лисьи следы.',
   'c5':'В стороне есть строительная лестница, на которую взбирались строители столпа.',
-  'c6':'Рядом со столпом лежит грубый детский рисунок углем, изображающий великана.'
+  'c6':'Рядом со столпом лежит грубый рисунок углем, изображающий великана.'
 };
 const ARTIFACT_TITLES=['Черный стяг ётунов','Копье Гримлиса','Огромный сигнальный столп'];
 const ARTIFACT_TEXTS={
   0:{unknown:'Черный стяг с руной ётунов.',
-     naive:'Гримлис дорисовал любимую игрушку, не понимая значения символа.',
+     naive:'Гримлис дорисовал лиса, не понимая значения символа.',
      cynic:'Гримлис хотел призвать ётунов, нарисовав руну их страны.'},
   1:{unknown:'Старое копье Гримлиса у кострища. Чистое.',
      naive:'Во время нападения Гримлис прикрывался щитом.',
@@ -705,6 +735,12 @@ const EXIT_R=4,EXIT_L_C=0,EXIT_R_C=8;
 const START_R=4,START_C=4;
 
 // ═══════════════════════════════════════════════════════════
+// MAZE — ARBITER CONSTANTS
+// ═══════════════════════════════════════════════════════════
+const ARBITER_P_R=0, ARBITER_P_C=4;   // player start: top-centre
+const ARBITER_ALT_R=8, ARBITER_ALT_C=4; // alter-ego start: bottom-centre
+
+// ═══════════════════════════════════════════════════════════
 // MAZE — INTEGRATION STATE
 // currentArtifact: which artifact index the running maze is for
 // ═══════════════════════════════════════════════════════════
@@ -719,31 +755,100 @@ function launchMaze(artifactIdx){
   startGame();
 }
 
+function launchArbiterMaze(choice){
+  // Called when both linked artifacts are locked with conflicting interpretations
+  const screenMaze=document.getElementById('screen-maze');
+  screenMaze.classList.add('active');
+  const la=LINKED_ARTIFACTS[0],lb=LINKED_ARTIFACTS[1];
+  document.getElementById('maze-artifact-label').textContent=
+    '« '+ARTIFACT_TITLES[la]+' vs '+ARTIFACT_TITLES[lb]+' »';
+  currentArtifact=-2; // sentinel: arbiter mode, not a specific artifact
+  startArbiterGame(choice);
+}
+
 function returnToGraph(result){
-  // result: 'naive' | 'cynic' | 'death' (on death, re-run maze for same artifact)
   if(result==='death'){
-    // Just re-enter maze for same artifact after a moment
     setTimeout(()=>startGame(),400);
     return;
   }
-  // Fix artifact interpretation
+  // Arbiter mode result
+  if(currentArtifact===-2){
+    // Lock both linked artifacts with the final result
+    LINKED_ARTIFACTS.forEach(i=>{
+      artifactState[i]=result;
+      artifactLocked[i]=true;
+    });
+    const screenMaze=document.getElementById('screen-maze');
+    screenMaze.classList.remove('active');
+    currentArtifact=-1;
+    isArbiterMode=false;
+    refreshUI();
+    return;
+  }
+  // Normal single-artifact result
   const i=currentArtifact;
   artifactState[i]=result;
   artifactLocked[i]=true;
 
-  // Linked artifact: same value, last maze wins, lock it too
+  // Check if this creates a conflict with a linked artifact that is already locked
   if(LINKED_ARTIFACTS.includes(i)){
     const li=LINKED_ARTIFACTS.find(x=>x!==i);
-    artifactState[li]=result;
-    // Don't lock the linked one if it hasn't been played yet — it can still launch maze
-    // But if it was already locked, keep its own result
+    if(artifactLocked[li]&&artifactState[li]!==result){
+      // Conflict detected — show arbiter choice screen
+      const screenMaze=document.getElementById('screen-maze');
+      screenMaze.classList.remove('active');
+      currentArtifact=-1;
+      refreshUI();
+      setTimeout(()=>showArbiterChoiceOverlay(),200);
+      return;
+    }else{
+      // No conflict — propagate value to linked artifact if not yet locked
+      if(!artifactLocked[li]) artifactState[li]=result;
+    }
   }
 
-  // Hide maze screen and return to graph
   const screenMaze=document.getElementById('screen-maze');
   screenMaze.classList.remove('active');
   currentArtifact=-1;
   refreshUI();
+}
+
+function showArbiterChoiceOverlay(){
+  // Show conflict resolution overlay on graph screen
+  const la=LINKED_ARTIFACTS[0],lb=LINKED_ARTIFACTS[1];
+  const stA=artifactState[la],stB=artifactState[lb];
+  const naiveLabel='Обе улики — наивная трактовка';
+  const cynicLabel='Обе улики — циничная трактовка';
+
+  // Reuse maze overlay but on the graph screen — build a floating overlay instead
+  const ov=document.createElement('div');
+  ov.id='arbiter-choice-overlay';
+  ov.style.cssText=`position:fixed;inset:0;background:rgba(5,5,5,0.97);z-index:150;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;`;
+  ov.innerHTML=`
+    <div style="font-family:'Cinzel',serif;font-size:20px;letter-spacing:0.3em;color:#c4a882;text-transform:uppercase">Противоречие</div>
+    <div style="font-family:'IM Fell English',serif;font-size:13px;letter-spacing:0.1em;color:#8a7060;text-align:center;max-width:440px;line-height:1.7">
+      ${ARTIFACT_TITLES[la]} и ${ARTIFACT_TITLES[lb]} трактованы по-разному.<br>
+      Войди в лабиринт и докажи свою правоту.
+    </div>
+    <div style="display:flex;gap:16px" id="arbiter-btns"></div>`;
+  document.body.appendChild(ov);
+
+  const mk=(label,choice,cls)=>{
+    const b=document.createElement('button');
+    b.className='overlay-btn';
+    b.style.borderColor=cls==='cynic'?'rgba(192,57,43,0.6)':'rgba(39,174,96,0.6)';
+    b.style.color=cls==='cynic'?'#c0392b':'#27ae60';
+    b.textContent=label;
+    b.onclick=()=>{
+      document.body.removeChild(ov);
+      launchArbiterMaze(choice);
+    };
+    return b;
+  };
+  const btns=ov.querySelector('#arbiter-btns');
+  btns.appendChild(mk(cynicLabel,'cynic','cynic'));
+  btns.appendChild(mk(naiveLabel,'naive','naive'));
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -797,6 +902,12 @@ function initCandles(){
 // ═══════════════════════════════════════════════════════════
 let pR=START_R,pC=START_C,steps=0,gameActive=false,candleLit=true;
 let mR=-1,mC=-1,mMode='idle',mChase=0,runeAvailable=true;
+// Arbiter mode state
+let isArbiterMode=false;
+let playerChoice='naive';   // which exit the player chose
+let altR=ARBITER_ALT_R, altC=ARBITER_ALT_C, altCandleLit=true;
+let altPrevR=ARBITER_ALT_R, altPrevC=ARBITER_ALT_C;
+let pPrevR=START_R, pPrevC=START_C; // track prev pos for collision rollback
 
 // ═══════════════════════════════════════════════════════════
 // MAZE — DOM REFS
@@ -812,6 +923,7 @@ const overlayTitle=document.getElementById('overlay-title');
 const overlaySub=document.getElementById('overlay-sub');
 const overlayBtns=document.getElementById('overlay-btns');
 const runeBtnEl=document.getElementById('rune-btn');
+const altegoTok=document.getElementById('altego-token');
 const cellEls=[];
 
 // ═══════════════════════════════════════════════════════════
@@ -856,13 +968,32 @@ function getLitSet(){
   return lit;
 }
 
+function getAltLitSet(){
+  // Alter-ego's illuminated cells — always visible to player in arbiter mode
+  const lit=new Set([`${altR},${altC}`]);
+  if(altCandleLit){
+    [[Nd,-1,0],[Sd,1,0],[Wd,0,-1],[Ed,0,1]].forEach(([dir,dr,dc])=>{
+      if(!MAZE[altR][altC][dir])return;
+      const nr=altR+dr,nc=altC+dc;
+      if(nr<0||nr>=ROWS||nc<0||nc>=COLS)return;
+      if(!MAZE[nr][nc][[Sd,Nd,Ed,Wd][dir]])return;
+      lit.add(`${nr},${nc}`);
+    });
+  }
+  return lit;
+}
+
 function updateLighting(){
   const lit=getLitSet();
+  const altLit=isArbiterMode?getAltLitSet():new Set();
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     const el=cellEls[r][c];const key=`${r},${c}`;
-    el.classList.remove('lit','player-cell','exit-left','exit-right','static-lit');
-    if(lit.has(key)){
-      el.classList.remove('dark');el.classList.add('lit');
+    el.classList.remove('lit','player-cell','exit-left','exit-right','static-lit','altlit');
+    const inPlayerLit=lit.has(key);
+    const inAltLit=altLit.has(key);
+    if(inPlayerLit||inAltLit){
+      el.classList.remove('dark');
+      el.classList.add(inPlayerLit?'lit':'altlit');
       if(r===pR&&c===pC)el.classList.add('player-cell');
       if(r===EXIT_R&&c===EXIT_L_C)el.classList.add('exit-left');
       if(r===EXIT_R&&c===EXIT_R_C)el.classList.add('exit-right');
@@ -874,6 +1005,7 @@ function updateLighting(){
     if(sc)sc.className='static-candle '+(scLit[`${r},${c}`]?'lit-yellow':'unlit');
   });
   playerTok.classList.toggle('candle-out',!candleLit);
+  if(isArbiterMode) altegoTok.classList.toggle('candle-out',!altCandleLit);
   candleSt.textContent=candleLit?'свеча горит':'свеча погашена';
   candleSt.className=candleLit?'':'out';
 }
@@ -936,6 +1068,7 @@ function moveMonsterToward(tr,tc){const s=bfsStep(mR,mC,tr,tc);if(s){mR=s.r;mC=s
 
 function spawnMonster(){
   const forbidden=new Set([`${pR},${pC}`,`${EXIT_R},${EXIT_L_C}`,`${EXIT_R},${EXIT_R_C}`]);
+  if(isArbiterMode) forbidden.add(`${altR},${altC}`);
   SC_POSITIONS.forEach(([r,c])=>forbidden.add(`${r},${c}`));
   const cands=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
@@ -946,10 +1079,34 @@ function spawnMonster(){
   mR=r;mC=c;mMode='idle';mChase=0;
 }
 
+function bfsDist(fr,fc,tr,tc){
+  if(fr===tr&&fc===tc)return 0;
+  const vis=new Set([`${fr},${fc}`]);
+  const q=[{r:fr,c:fc,d:0}];
+  while(q.length){
+    const{r,c,d}=q.shift();
+    for(const[dir,dr,dc]of[[Nd,-1,0],[Sd,1,0],[Wd,0,-1],[Ed,0,1]]){
+      if(!MAZE[r][c][dir])continue;
+      const nr=r+dr,nc=c+dc;
+      if(nr<0||nr>=ROWS||nc<0||nc>=COLS)continue;
+      const key=`${nr},${nc}`;if(vis.has(key))continue;
+      vis.add(key);if(nr===tr&&nc===tc)return d+1;
+      q.push({r:nr,c:nc,d:d+1});
+    }
+  }return 9999;
+}
+
 function monsterTurn(){
   if(mR<0)return;
-  const monVisible=getLitSet().has(`${mR},${mC}`);
-  const monHasLOS=los(mR,mC,pR,pC);
+  // In arbiter mode: choose nearest target (player or altego)
+  let tR=pR,tC=pC;
+  if(isArbiterMode){
+    const dp=bfsDist(mR,mC,pR,pC), da=bfsDist(mR,mC,altR,altC);
+    if(da<dp){tR=altR;tC=altC;}
+  }
+  const allLit=new Set([...getLitSet(),...(isArbiterMode?getAltLitSet():new Set())]);
+  const monVisible=allLit.has(`${mR},${mC}`);
+  const monHasLOS=los(mR,mC,tR,tC);
 
   if(mMode==='idle'){
     if(monVisible) mMode='spotted';
@@ -958,7 +1115,8 @@ function monsterTurn(){
   if(mMode==='spotted'){
     mMode='chasing';mChase=4;
     if(monHasLOS&&candleLit) candleLit=false;
-    moveMonsterToward(pR,pC);mChase--;
+    if(isArbiterMode&&monHasLOS&&altCandleLit&&tR===altR) altCandleLit=false;
+    moveMonsterToward(tR,tC);mChase--;
     if(mChase<=0){
       mR=-1;mC=-1;mMode='idle';
       setTimeout(()=>{if(!gameActive)return;spawnMonster();renderMonster();updateRuneBtn();},700);
@@ -967,7 +1125,8 @@ function monsterTurn(){
   }
   if(mMode==='chasing'){
     if(los(mR,mC,pR,pC)&&candleLit) candleLit=false;
-    moveMonsterToward(pR,pC);mChase--;
+    if(isArbiterMode&&los(mR,mC,altR,altC)&&altCandleLit) altCandleLit=false;
+    moveMonsterToward(tR,tC);mChase--;
     if(mChase<=0){
       mR=-1;mC=-1;mMode='idle';
       setTimeout(()=>{if(!gameActive)return;spawnMonster();renderMonster();updateRuneBtn();},700);
@@ -987,6 +1146,24 @@ function updateStatus(){
 function updatePlayerToken(){
   playerTok.style.left=(pC*CELL_SIZE+CELL_SIZE/2)+'px';
   playerTok.style.top=(pR*CELL_SIZE+CELL_SIZE/2)+'px';
+  if(isArbiterMode){
+    altegoTok.style.display='block';
+    altegoTok.style.left=(altC*CELL_SIZE+CELL_SIZE/2)+'px';
+    altegoTok.style.top=(altR*CELL_SIZE+CELL_SIZE/2)+'px';
+  }else{
+    altegoTok.style.display='none';
+  }
+}
+
+function markPlayerTargetExit(){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    cellEls[r][c].classList.remove('player-target-exit','arbiter-blocked-exit');
+  }
+  if(!isArbiterMode)return;
+  const targetC=playerChoice==='cynic'?EXIT_L_C:EXIT_R_C;
+  const blockedC=playerChoice==='cynic'?EXIT_R_C:EXIT_L_C;
+  cellEls[EXIT_R][targetC].classList.add('player-target-exit');
+  cellEls[EXIT_R][blockedC].classList.add('arbiter-blocked-exit');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1018,6 +1195,52 @@ function activateRune(){
 const DIR_MAP={'w':[Nd,-1,0],'s':[Sd,1,0],'a':[Wd,0,-1],'d':[Ed,0,1]};
 const BUMP={'w':'translate(0,-5px)','s':'translate(0,5px)','a':'translate(-5px,0)','d':'translate(5px,0)'};
 
+function altEgoTurn(){
+  // Alter-ego moves one step toward its target exit (opposite of player choice)
+  const altTarget=playerChoice==='cynic'?{r:EXIT_R,c:EXIT_R_C}:{r:EXIT_R,c:EXIT_L_C};
+  // Check if already at exit cell — step out
+  if(altR===EXIT_R&&altC===EXIT_R_C&&playerChoice==='cynic'){triggerAltWin();return;}
+  if(altR===EXIT_R&&altC===EXIT_L_C&&playerChoice==='naive'){triggerAltWin();return;}
+  const s=bfsStep(altR,altC,altTarget.r,altTarget.c);
+  if(s){altPrevR=altR;altPrevC=altC;altR=s.r;altC=s.c;}
+  // Alter-ego candle / static candle interaction
+  const scKey=`${altR},${altC}`;
+  if(scLit.hasOwnProperty(scKey)){
+    if(!scLit[scKey]&&altCandleLit)scLit[scKey]=true;
+    if(scLit[scKey]&&!altCandleLit)altCandleLit=true;
+  }
+  // Check alt stepped onto exit boundary
+  if(altR===EXIT_R&&altC===EXIT_R_C&&playerChoice==='cynic'){triggerAltWin();return;}
+  if(altR===EXIT_R&&altC===EXIT_L_C&&playerChoice==='naive'){triggerAltWin();return;}
+}
+
+function checkArbiterCollision(){
+  // Reset both to start if they are on adjacent corridor-connected cells (dist == 1)
+  // This prevents the deadlock where both sit one step apart indefinitely
+  const dist=bfsDist(pR,pC,altR,altC);
+  if(dist<=1){
+    pR=ARBITER_P_R;pC=ARBITER_P_C;pPrevR=ARBITER_P_R;pPrevC=ARBITER_P_C;
+    altR=ARBITER_ALT_R;altC=ARBITER_ALT_C;altPrevR=ARBITER_ALT_R;altPrevC=ARBITER_ALT_C;
+    candleLit=true;altCandleLit=true;
+  }
+}
+
+function checkArbiterMonsterContact(){
+  if(mR<0)return false;
+  let hit=false;
+  if(pR===mR&&pC===mC){
+    pR=ARBITER_P_R;pC=ARBITER_P_C;pPrevR=ARBITER_P_R;pPrevC=ARBITER_P_C;
+    candleLit=true;
+    hit=true;
+  }
+  if(altR===mR&&altC===mC){
+    altR=ARBITER_ALT_R;altC=ARBITER_ALT_C;altPrevR=ARBITER_ALT_R;altPrevC=ARBITER_ALT_C;
+    altCandleLit=true;
+    hit=true;
+  }
+  return hit;
+}
+
 function tryMove(key){
   if(!gameActive)return;
   const k=key.toLowerCase();if(!DIR_MAP[k])return;
@@ -1026,8 +1249,16 @@ function tryMove(key){
 
   // Boundary exit — cynic (left/red) or naive (right/green)
   if(nr<0||nr>=ROWS||nc<0||nc>=COLS){
-    if(pR===EXIT_R&&pC===EXIT_L_C&&k==='a'){triggerWin('left');return;}
-    if(pR===EXIT_R&&pC===EXIT_R_C&&k==='d'){triggerWin('right');return;}
+    if(pR===EXIT_R&&pC===EXIT_L_C&&k==='a'){
+      // In arbiter mode: block wrong exit
+      if(isArbiterMode&&playerChoice!=='cynic'){bumpP(k);return;}
+      triggerWin('left');return;
+    }
+    if(pR===EXIT_R&&pC===EXIT_R_C&&k==='d'){
+      // In arbiter mode: block wrong exit
+      if(isArbiterMode&&playerChoice!=='naive'){bumpP(k);return;}
+      triggerWin('right');return;
+    }
     bumpP(k);return;
   }
 
@@ -1035,6 +1266,8 @@ function tryMove(key){
   if(!MAZE[nr][nc][[Sd,Nd,Ed,Wd][dir]]){bumpP(k);return;}
   if(candleLit&&!getLitSet().has(`${nr},${nc}`)){bumpP(k);return;}
 
+  // Save prev position for collision rollback
+  pPrevR=pR;pPrevC=pC;
   pR=nr;pC=nc;steps++;stepsEl.textContent='Шагов: '+steps;
 
   const scKey=`${pR},${pC}`;
@@ -1043,9 +1276,27 @@ function tryMove(key){
     if(scLit[scKey]&&!candleLit)candleLit=true;
   }
 
-  monsterTurn();
-  updateLighting();updatePlayerToken();renderMonster();updateStatus();updateRuneBtn();
+  // Arbiter: check player collision with altego before monster turn
+  if(isArbiterMode) checkArbiterCollision();
 
+  monsterTurn();
+
+  // Arbiter: alter-ego takes its turn
+  if(isArbiterMode&&gameActive) altEgoTurn();
+  if(isArbiterMode&&gameActive) checkArbiterCollision();
+
+  updateLighting();updatePlayerToken();renderMonster();updateStatus();updateRuneBtn();
+  if(isArbiterMode) markPlayerTargetExit();
+
+  // Arbiter: monster contact check (reset to start)
+  if(isArbiterMode&&gameActive){
+    if(checkArbiterMonsterContact()){
+      updateLighting();updatePlayerToken();
+    }
+    return;
+  }
+
+  // Normal mode: death on monster contact
   if(mR>=0&&pR===mR&&pC===mC){triggerDeath();return;}
 }
 
@@ -1059,9 +1310,27 @@ function bumpP(k){
 // ═══════════════════════════════════════════════════════════
 function triggerWin(side){
   gameActive=false;
-  // left exit = red = cynic; right exit = green = naive
   const result=side==='left'?'cynic':'naive';
   const L=side==='left';
+  if(isArbiterMode){
+    // Player wins arbiter — did they reach THEIR target exit?
+    const playerWon=result===playerChoice;
+    const finalResult=playerWon?playerChoice:(playerChoice==='cynic'?'naive':'cynic');
+    overlay.className='active '+(finalResult==='cynic'?'win-left':'win-right');
+    overlayTitle.textContent=playerWon?'Ты первым':'Альтер-эго первым';
+    overlaySub.textContent=playerWon
+      ? 'Обе улики трактованы ' + (finalResult==='cynic'?'цинично':'наивно')
+      : 'Обе улики трактованы ' + (finalResult==='cynic'?'цинично':'наивно');
+    overlayBtns.innerHTML='';
+    const btn=document.createElement('button');btn.className='overlay-btn';
+    btn.textContent='Вернуться к уликам';
+    btn.onclick=()=>{
+      overlay.className='';overlay.classList.remove('active');
+      returnToGraph(finalResult);
+    };
+    overlayBtns.appendChild(btn);
+    return;
+  }
   overlay.className='active '+(L?'win-left':'win-right');
   overlayTitle.textContent=L?'Красный Свет — Циничная':'Зелёный Свет — Наивная';
   overlayBtns.innerHTML='';
@@ -1075,7 +1344,26 @@ function triggerWin(side){
   overlayBtns.appendChild(btn);
 }
 
+function triggerAltWin(){
+  // Alter-ego reached its target exit before player
+  gameActive=false;
+  const finalResult=playerChoice==='cynic'?'naive':'cynic';
+  overlay.className='active '+(finalResult==='cynic'?'win-left':'win-right');
+  overlayTitle.textContent='Альтер-эго победило';
+  overlaySub.textContent='Обе улики трактованы '+(finalResult==='cynic'?'цинично':'наивно');
+  overlayBtns.innerHTML='';
+  const btn=document.createElement('button');btn.className='overlay-btn';
+  btn.textContent='Вернуться к уликам';
+  btn.onclick=()=>{
+    overlay.className='';overlay.classList.remove('active');
+    returnToGraph(finalResult);
+  };
+  overlayBtns.appendChild(btn);
+}
+
 function triggerDeath(){
+  // In arbiter mode death is handled by checkArbiterMonsterContact (no death screen)
+  if(isArbiterMode)return;
   gameActive=false;
   overlay.className='active death';
   overlayTitle.textContent='Темнота';
@@ -1094,18 +1382,50 @@ function triggerDeath(){
 // MAZE — START
 // ═══════════════════════════════════════════════════════════
 function startGame(){
+  isArbiterMode=false;
   MAZE=generateMaze();initCandles();
-  pR=START_R;pC=START_C;steps=0;candleLit=true;
+  pR=START_R;pC=START_C;pPrevR=START_R;pPrevC=START_C;
+  steps=0;candleLit=true;
   mR=-1;mC=-1;mMode='idle';mChase=0;runeAvailable=true;
   stepsEl.textContent='Шагов: 0';
   buildGrid();updateLighting();updatePlayerToken();
   monsterTok.style.display='none';monsterTok.classList.remove('force-visible','chasing');
+  altegoTok.style.display='none';
   statusBar.textContent='';statusBar.className='';
   updateRuneBtn();
-  // Entry overlay
   overlay.className='active start';
   overlayTitle.textContent='The Labyrinth';
   overlaySub.textContent='Найди выход. Не смотри в глаза.';
+  overlayBtns.innerHTML='';
+  const btn=document.createElement('button');btn.className='overlay-btn';btn.textContent='Войти';
+  btn.onclick=()=>{
+    overlay.className='';overlay.classList.remove('active');
+    gameActive=true;
+    setTimeout(()=>{if(!gameActive)return;spawnMonster();renderMonster();},900);
+  };
+  overlayBtns.appendChild(btn);
+}
+
+function startArbiterGame(choice){
+  // choice: 'naive' | 'cynic' — what the player wants both linked artifacts to be
+  isArbiterMode=true;
+  playerChoice=choice;
+  MAZE=generateMaze();initCandles();
+  pR=ARBITER_P_R;pC=ARBITER_P_C;pPrevR=ARBITER_P_R;pPrevC=ARBITER_P_C;
+  altR=ARBITER_ALT_R;altC=ARBITER_ALT_C;altPrevR=ARBITER_ALT_R;altPrevC=ARBITER_ALT_C;
+  altCandleLit=true;
+  steps=0;candleLit=true;
+  mR=-1;mC=-1;mMode='idle';mChase=0;runeAvailable=true;
+  stepsEl.textContent='Шагов: 0';
+  buildGrid();updateLighting();updatePlayerToken();
+  markPlayerTargetExit();
+  monsterTok.style.display='none';monsterTok.classList.remove('force-visible','chasing');
+  statusBar.textContent='';statusBar.className='';
+  updateRuneBtn();
+  overlay.className='active start';
+  overlayTitle.textContent='Лабиринт Противоречия';
+  const choiceLabel=choice==='cynic'?'Красный выход — Цинизм':'Зелёный выход — Наивность';
+  overlaySub.textContent='Твоя цель: '+choiceLabel+'. Альтер-эго движется к противоположному.';
   overlayBtns.innerHTML='';
   const btn=document.createElement('button');btn.className='overlay-btn';btn.textContent='Войти';
   btn.onclick=()=>{
