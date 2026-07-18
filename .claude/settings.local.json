@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Volumes/SPARK/Foxy/Development -type f -name *.md)",
+      "Bash(find /Volumes/SPARK/Foxy -type f \\\\\\(-name *.md -o -name *.txt -o -name *.pdf -o -name *.docx -o -name *.doc \\\\\\))",
+      "Bash(find /Volumes/SPARK/Foxy/Foxy_Vault -type f -name \"*.md\" -exec wc -l {} +)",
+      "Bash(find /Volumes/SPARK/Foxy/Development/traces_of_light -name *.prefab -path */yarnspinner*)",
+      "Bash(find /Volumes/SPARK/Foxy/Development/traces_of_light/Library/PackageCache/dev.yarnspinner.unity@f525a4fae7a3 -name *.prefab)",
+      "Bash(find /Volumes/SPARK/Foxy/Development/traces_of_light/Assets -name *.csv -o -name *StringTable* -o -name *Strings*)",
+      "Bash(find /Volumes/SPARK/Foxy/Development/traces_of_light/Library/Artifacts -name *.artifact)"
+    ]
+  }
+}
