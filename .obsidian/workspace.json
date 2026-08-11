@@ -1,14 +1,14 @@
 {
   "main": {
-    "id": "275839e7ec592cd2",
+    "id": "2fd9614654c858c7",
     "type": "split",
     "children": [
       {
-        "id": "130d1c5b962376f3",
+        "id": "8aa9e38ec66c708a",
         "type": "tabs",
         "children": [
           {
-            "id": "0b2fda1822e1e7d5",
+            "id": "31836e4f6a3e6634",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -23,28 +23,30 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "600c3442a4116b41",
+    "id": "cbd45e7cf4f58c08",
     "type": "split",
     "children": [
       {
-        "id": "35c4833bb9fa321a",
+        "id": "1fd1c2ebc79a7b14",
         "type": "tabs",
         "children": [
           {
-            "id": "6a637e76726040ef",
+            "id": "dfced69a6d84432c",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Файловый менеджер"
             }
           },
           {
-            "id": "c9b7ffc5f9c0a56b",
+            "id": "92d46cd20902e5c8",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -61,7 +63,7 @@
             }
           },
           {
-            "id": "73100135615019e5",
+            "id": "87725dfeede61cec",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -74,23 +76,24 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 399.5
   },
   "right": {
-    "id": "788cc10ce6ebabf5",
+    "id": "d7f9c94bd0887645",
     "type": "split",
     "children": [
       {
-        "id": "2695ba6966ad0bfa",
+        "id": "712f8e521bf40622",
         "type": "tabs",
+        "dimension": 65.40697674418605,
         "children": [
           {
-            "id": "46c1910ecc3a7b3a",
+            "id": "58ef8b2f79decc47",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Foxy_Vault/Сценарий/Главы/Пролог/Квест с медальоном.md",
+                "file": "remote-vault/Tasks Board/Task Board.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -100,25 +103,25 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Обратные ссылки для Квест с медальоном"
+              "title": "Обратные ссылки для Task Board"
             }
           },
           {
-            "id": "a6b11b1823811dc0",
+            "id": "16a3b67a593785a2",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Foxy_Vault/Сценарий/Главы/Пролог/Квест с медальоном.md",
+                "file": "Game Design Document/Геймплей/Система квестов.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Исходящие ссылки из Квест с медальоном"
+              "title": "Исходящие ссылки из Система квестов"
             }
           },
           {
-            "id": "031f1a70eaa164da",
+            "id": "122aa8615b6b9a14",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -133,7 +136,21 @@
             }
           },
           {
-            "id": "ca6b3ebe34053e31",
+            "id": "57018b2eff8b5340",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": true,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Структура"
+            }
+          },
+          {
+            "id": "083e4335d9a5dfce",
             "type": "leaf",
             "state": {
               "type": "all-properties",
@@ -145,94 +162,95 @@
               "icon": "lucide-archive",
               "title": "Все свойства"
             }
-          },
+          }
+        ],
+        "currentTab": 3
+      },
+      {
+        "id": "4af2e60f134e830f",
+        "type": "tabs",
+        "dimension": 34.593023255813954,
+        "children": [
           {
-            "id": "2c7c8aaf9dac6318",
+            "id": "6f1733f0de591345",
             "type": "leaf",
             "state": {
-              "type": "outline",
-              "state": {
-                "file": "Foxy_Vault/Сценарий/Главы/Пролог/Квест с медальоном.md",
-                "followCursor": false,
-                "showSearch": false,
-                "searchQuery": ""
-              },
-              "icon": "lucide-list",
-              "title": "Структура Квест с медальоном"
+              "type": "calendar",
+              "state": {},
+              "icon": "lucide-ghost",
+              "title": "calendar"
             }
           }
         ]
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 306.5
   },
   "left-ribbon": {
     "hiddenItems": {
-      "switcher:Меню быстрого перехода": false,
       "graph:Граф": false,
+      "bases:Создать новую базу": false,
+      "switcher:Меню быстрого перехода": false,
       "canvas:Создать новый холст": false,
       "daily-notes:Сегодняшняя заметка": false,
       "templates:Вставить шаблон": false,
       "command-palette:Открыть палитру команд": false,
-      "bases:Создать новую базу": false,
-      "obsidian-git:Open Git source control": false,
-      "obsidian-excalidraw-plugin:Создать новый чертеж": false
+      "obsidian-excalidraw-plugin:Создать новый чертеж": false,
+      "obsidian-git:Open Git source control": false
     }
   },
-  "active": "0b2fda1822e1e7d5",
+  "active": "31836e4f6a3e6634",
   "lastOpenFiles": [
-    "Development/traces_of_light/ProjectSettings/TimelineSettings.asset",
-    "Development/traces_of_light/Assets/UI.bank.meta",
-    "Development/traces_of_light/Assets/UI.bank",
-    "Development/traces_of_light/Assets/UI 1.bank.meta",
-    "Development/traces_of_light/Assets/UI 1.bank",
-    "Development/traces_of_light/Assets/StreamingAssets/UI.bank.meta",
-    "Development/traces_of_light/Assets/StreamingAssets/UI.bank",
-    "Development/traces_of_light/Assets/StreamingAssets/Road_to_home.bank.meta",
-    "Development/traces_of_light/Assets/StreamingAssets/Road_to_home.bank",
-    "Development/traces_of_light/Assets/StreamingAssets/Master.strings.bank.meta",
-    "Development/traces_of_light/Assets/StreamingAssets/Master.strings.bank",
-    "Development/traces_of_light/Assets/Plugins/FMOD/images/Wrench.png",
-    "Development/traces_of_light/Assets/Plugins/FMOD/images/TransportStopButtonOn.png",
-    "Development/traces_of_light/Assets/Plugins/FMOD/images/TransportStopButtonOff.png",
-    "Development/traces_of_light/Assets/Plugins/FMOD/images/TransportPlayButtonOn.png",
-    "Development/traces_of_light/Assets/Plugins/FMOD/images/TransportPlayButtonOff.png",
-    "Development/traces_of_light/Assets/Plugins/FMOD/images/TransportOpen.png",
-    "Development/traces_of_light/Assets/Plugins/FMOD/images/TickGreen.png",
-    "Development/traces_of_light/Assets/Plugins/FMOD/images/StudioIcon.png",
-    "Development/traces_of_light/Assets/Plugins/FMOD/images/SnapshotIcon.png",
-    "Development/traces_of_light/Assets/Plugins/FMOD/images/SelectedAlt.png",
-    "Claude/node_modules/@anthropic-ai/claude-code/README.md",
-    "Claude/node_modules/@anthropic-ai/claude-code/LICENSE.md",
+    "Sound/README.txt",
+    "Sound",
+    "Foxy_Vault",
+    "Development/traces_of_light",
+    "Development",
+    "Concept Art/README.txt",
+    "Concept Art",
+    "Claude/production/session-logs/compaction-log.txt",
+    "Claude/production/session-logs/agent-audit.log",
+    "Claude/production/session-logs",
+    "Claude/production",
     "Claude/node_modules/@img/sharp-libvips-darwin-x64/README.md",
     "Claude/node_modules/@img/sharp-darwin-x64/README.md",
-    "CLAUDE.md",
+    "Сценарий/Главы/Глава V.md",
+    "Claude/node_modules/@anthropic-ai/claude-code/LICENSE.md",
+    "Claude/node_modules/@anthropic-ai/claude-code/README.md",
     "Claude/CLAUDE.md",
-    "Без названия.canvas",
-    "Без названия 2.canvas",
-    "Без названия 3.canvas",
-    "Без названия 4.canvas",
-    "2026-07-18.md",
-    "2026-06-18.md",
-    "Foxy_Vault/Персонажи/Йормунганд.md",
-    "Foxy_Vault/Сценарий/Структура сценария всех глав v2.md",
-    "Foxy_Vault/Сценарий/quest_brief.md",
-    "Foxy_Vault/Сценарий/Главы/Пролог/Квест с медальоном 1.md",
-    "node_modules/@img/sharp-libvips-darwin-x64/README.md",
-    "Foxy_Vault/Сеттинг/Локации/2. Родовой дом-нора Лисенка и лисья община.md",
-    "Foxy_Vault/Персонажи/Скиргейр/Дед Лис.md",
-    "Foxy_Vault/Лор/Таблица событий.md",
-    "Foxy_Vault/Лор/Лор.md",
-    "Foxy_Vault/Лор/Timeline.md",
-    "Foxy_Vault/Персонажи/Лакка/Лакка.md",
-    "Foxy_Vault/Нарратив/narrative/disclosure-analysis.md",
-    "Foxy_Vault/Сеттинг/Локации/Пролог/Лес на пути к капищу.md",
-    "Без названия 1.canvas",
-    "Foxy_Vault/Сеттинг/Онтология мира.md",
-    "Foxy_Vault/Сеттинг/Медальон.md",
-    "Foxy_Vault/Кратко/Управляющая идея.md",
-    "Foxy_Vault/Кратко/Логлайн.md"
+    "Сценарий/Главы/Глава IV.md",
+    "Сценарий/Главы/Глава III.md",
+    "Сценарий/Главы/Глава II.md",
+    "Сценарий/Главы/Глава I.md",
+    "Кратко/Управляющая идея.md",
+    "Кратко/Логлайн.md",
+    "Нарратив/narrative/disclosure-analysis.md",
+    "Лор/Карта.md",
+    "Game Design Document/Геймплей/Игровые флешбеки после трактовки главы.md",
+    "Кратко/Центральная тема.md",
+    "Сценарий/Структура сценария всех глав.md",
+    "Сценарий/Структура сценария всех глав v2.md",
+    "Сценарий/События для трактовки/Смерть Хрёста.md",
+    "Сценарий/События для трактовки/Смерть Скиргейра.md",
+    "Сценарий/События для трактовки/Гибель Сельви.md",
+    "Сценарий/Концовки/Версия Лакки.md",
+    "Сценарий/Концовки/Версия Гримлиса.md",
+    "Сценарий/Главы/Пролог/Пролог.md",
+    "Сценарий/Главы/Пролог/Пролог old.md",
+    "Drawings/event_structure_redirect.canvas",
+    "Drawings/ontology_system_diagram.svg",
+    "Drawings/event_structure_redirect.svg",
+    "Drawings/Pasted image 20260406141234.png",
+    "ontology_system_diagram.svg",
+    "event_structure_redirect.svg",
+    "Pasted image 20260406140921.png",
+    "Pasted image 20260406140736.png",
+    "Pasted Image 20260326143308_359.png",
+    "Pasted Image 20260326140528_383.png",
+    "Pasted Image 20260326141234_731.png",
+    "remote-vault/Untitled.canvas",
+    "remote-vault/Tasks Board/Без названия.canvas",
+    "Knowledge Den/Без названия.canvas"
   ]
 }
